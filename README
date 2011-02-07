@@ -1,0 +1,9 @@
+Basic usage
+~~~~~~~~~~~
+
+Thsi is an alpha peice of code showing the basis of signing meta data about a file
+
+python image_signer.py  -f /etc/fstab -k ~/.globus/userkey.pem -c ~/.globus/usercert.pem
+
+You may find the enviroment vriable in  env.sh may in future be uysed to add to the meta data.
+ 
