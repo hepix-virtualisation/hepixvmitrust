@@ -1,0 +1,3 @@
+include env.sh
+include README
+include vmimagesigner
