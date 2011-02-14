@@ -10,7 +10,7 @@ import os
 import sys
 import hashlib
 import os.path
-
+from M2Crypto import BIO, Rand, SMIME
 
 class imagemodel:
     interestingkeys = set([u'vmi_uid'])
@@ -132,6 +132,8 @@ class vmlistview:
         #print "frod=%s" % (entry)
         for item in entry.images:
             print item.metadata[u'vmi_uid']
+    def dumps(self,entry):
+        return json.dumps(entry, cls=VMimageListEncoder, sort_keys=True, indent=4)
 
 class vmlistcontroler:
     def __init__(self):
@@ -188,8 +190,25 @@ class vmlistcontroler:
         for item in requiredmetadata:
             value = self.model.metadata[item]
             if value == None:
-                print "fooo"
                 return False
+    def sign(self,signer_key,signer_cert,outfile):
+        content = self.view.dumps(self.model)
+        
+        self.SMIME = SMIME.SMIME()
+        self.SMIME.load_key(signer_key,signer_cert)
+        buf = BIO.MemoryBuffer(content)        
+        p7 = self.SMIME.sign(buf, SMIME.PKCS7_DETACHED)
+        buf = BIO.MemoryBuffer(content)
+        # Output p7 in mail-friendly format.
+        out = BIO.MemoryBuffer()
+        #out.write('From: sender@example.dom\n')
+        #out.write('To: recipient@example.dom\n')
+        #out.write('Subject: M2Crypto S/MIME testing\n')
+        self.SMIME.write(out, p7, buf)
+        self.message_signed = str(out.read())
+        with open(outfile, 'w') as f:
+            f.write(self.message_signed )
+        # Save the PRNG's state.
 def test_things():
     view = vmlistview()
     loadedlist = view.load_file('imagelist.json')
@@ -236,7 +255,7 @@ def main():
     p.add_option('-l', '--list', action ='store_true', help='lists VM images in the JSON')
     p.add_option('-k', '--signer_key', action ='store', help='path to signer key')
     p.add_option('-c', '--signer_certificate', action ='store', help='path to signer certificate')
-    p.add_option('-s', '--sign', action ='store_true', help='returns verbose output')
+    p.add_option('-s', '--sign', action ='store', help='returns verbose output')
     p.add_option('-f', '--format', action ='store', help='Set the format valid values are JSON and XML')
     
     options, arguments = p.parse_args()
@@ -245,6 +264,9 @@ def main():
     add_image_file = []
     del_image_metadata = []
     format = None
+    signer_key = os.environ['HOME'] + '/.globus/userkey.pem'
+    signer_cert = os.environ['HOME'] + '/.globus/usercert.pem'
+    signed_output = None
     list_images = False
     if options.template:
         template = options.template
@@ -264,10 +286,11 @@ def main():
     if options.signer_key:
         signer_key = options.signer_key
     if options.signer_certificate:
-        list_images = options.signer_certificate
+        signer_cert = options.signer_certificate
     if options.sign:
         actions.append('verify')
         actions.append('sign')
+        signed_output = options.sign
     if options.generate:
         generate_list = options.generate
         actions.append('generate')
@@ -291,11 +314,12 @@ def main():
     if 'image_list' in actions:
         listcontroler.images_list()
     if 'verify' in actions:
-        if success == listcontroler.verify():
+        success = listcontroler.verify()
+        if success == False:
             print "Failed to verify valid meta data for image."
             sys.exit(1)
     if 'sign' in actions:
-        listcontroler.sign()
+        listcontroler.sign(signer_key,signer_cert,signed_output)
     if 'save' in actions:
         listcontroler.save(json_output)
     #test_things()
