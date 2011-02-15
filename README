@@ -3,7 +3,26 @@ Basic usage
 
 Thsi is an alpha peice of code showing the basis of signing meta data about a file
 
-python image_signer.py  -f /etc/fstab -k ~/.globus/userkey.pem -c ~/.globus/usercert.pem
+$python vmilisttool.py -h
+Usage: vmilisttool.py [options]
 
-You may find the enviroment vriable in  env.sh may in future be uysed to add to the meta data.
- 
+Options:
+  -h, --help            show this help message and exit
+  -j JSON, --json=JSON  Path of the json output file
+  -t TEMPLATE, --template=TEMPLATE
+                        Path of the json template file
+  -a ADD, --add=ADD     adds a VM image to the JSON
+  -d DELETE, --delete=DELETE
+                        del a VM image to the JSON
+  -g GENERATE, --generate=GENERATE
+                        generates a VM image metadata for image
+  -i IMAGE, --image=IMAGE
+                        Sets the image to generates a VM image metadata
+  -l, --list            lists VM images in the JSON
+  -k SIGNER_KEY, --signer_key=SIGNER_KEY
+                        path to signer key
+  -c SIGNER_CERTIFICATE, --signer_certificate=SIGNER_CERTIFICATE
+                        path to signer certificate
+  -s SIGN, --sign=SIGN  returns verbose output
+  -f FORMAT, --format=FORMAT
+                        Set the format valid values are JSON and XML

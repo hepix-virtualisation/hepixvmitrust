@@ -5,9 +5,8 @@ setup(name='desy-grid-vmis',
     author="O M Synge",
     author_email="owen.Synge@desy.de",
     url="www-it.desy.de",
-    scripts = ["vmimagesigner"],
+    scripts = ["vmilisttool.py"],
     package_dir={'': '.'},
-    packages=['vmis'],
-    data_files=[('/usr/bin/', ['vmimagesigner']),
-        ('/usr/share/doc/vmimagemanager',['README','env.sh'])]
+    data_files=[('/usr/bin/', ['vmilisttool.py']),
+        ('/usr/share/doc/vmilisttool',['README','env.sh'])]
     )
