@@ -28,7 +28,6 @@ class imagemodel:
         self.metadata = {'vmi_uid' : vmi_uid,
             'vmi_url' : vmi_url,
             'vmi_hash_sha512' :vmi_hash_sha512,
-            'vmi_url' : vmi_url,
             'vmi_hypervisor' : vmi_hypervisor,
             'vmi_description' : vmi_description,
             'vmi_os_version' : vmi_os_version,
@@ -40,15 +39,18 @@ class listmodel:
     interestingkeys = set([u'vmi_uid'])
     def __init__(self,owner_real_name=None,
         owner_email=None,
-        vmi_url=None,
         vmic_url=None,
         images=[]):
         self.metadata = {
             'owner_real_name' : owner_real_name,
             'owner_email' : owner_email,
             'vmic_url' : vmic_url,
-            'vmi_url' : vmi_url}
+            }
         self.images = images
+
+
+
+
 
 class VMimageListEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -57,69 +59,76 @@ class VMimageListEncoder(json.JSONEncoder):
         if isinstance(obj, listmodel):
             imagelist = []
             for i in obj.images:
-                imagelist.append(self.default(i))
+                tmp_data = self.default(i)
+                if tmp_data == None:
+                    return json.JSONEncoder.default(self, obj)
+                else:
+                    imagelist.append(self.default(i))
             return {'metadata' : obj.metadata, 'images' : imagelist}
         return json.JSONEncoder.default(self, obj)
 
 def VMimageDecoder(dct):
-    if u'metadata' in dct.keys():
-        output =None
-        metadata = dct[u'metadata']
-        requiredmetadata = [u'vmi_uid',
-            u'vmi_url',
-            u'vmi_hash_sha512',
-            u'vmi_hypervisor',
-            u'vmi_description',
-            u'vmi_os_version',
-            u'vmi_os_architecture',
-            u'vmi_disk_size']
-        requiredmetadataset = set(requiredmetadata)
-        if requiredmetadataset.issubset(metadata.keys()):
-            output = imagemodel(vmi_uid=metadata[u'vmi_uid'],
-                vmi_url=metadata[u'vmi_url'],
-                vmi_hash_sha512=metadata[u'vmi_hash_sha512'],
-                vmi_hypervisor=metadata[u'vmi_hypervisor'],
-                vmi_description=metadata[u'vmi_description'],
-                vmi_os_version=metadata[u'vmi_os_version'],
-                vmi_os_architecture=metadata[u'vmi_os_architecture'],
-                vmi_disk_size=metadata[u'vmi_disk_size']
-                )
-            return output
-        return output
-    return dct
+    if not u'metadata' in dct.keys():
+        return None
+    metadata = dct[u'metadata']
+    requiredmetadata = [u'vmi_uid',
+        u'vmi_url',
+        u'vmi_hash_sha512',
+        u'vmi_hypervisor',
+        u'vmi_description',
+        u'vmi_os_version',
+        u'vmi_os_architecture',
+        u'vmi_disk_size']
+    requiredmetadataset = set(requiredmetadata)
+    if not requiredmetadataset.issubset(metadata.keys()):
+        
+        return None
+    return imagemodel(vmi_uid=metadata[u'vmi_uid'],
+        vmi_url=metadata[u'vmi_url'],
+        vmi_hash_sha512=metadata[u'vmi_hash_sha512'],
+        vmi_hypervisor=metadata[u'vmi_hypervisor'],
+        vmi_description=metadata[u'vmi_description'],
+        vmi_os_version=metadata[u'vmi_os_version'],
+        vmi_os_architecture=metadata[u'vmi_os_architecture'],
+        vmi_disk_size=metadata[u'vmi_disk_size']
+        )
 
-
+def VMimageListDecoder(dct):
+    requiredkeys = [u'metadata', u'images']
+    requiredkeysset = set(requiredkeys)
+    if not requiredkeysset.issubset(dct.keys()):
+        return False
+    listmetadata = dct[u'metadata']
+    requiredmetadata = [u'owner_real_name',
+        u'owner_real_name',
+        u'owner_email',
+        u'vmic_url']
+    requiredmetadataset = set(requiredmetadata)
+    if not requiredmetadataset.issubset(listmetadata.keys()):
+        return False
+    images = dct[u'images']
+    allimages = []
+    for image in images:
+        translatedimage = VMimageDecoder(image)
+        allimages.append(translatedimage)
+    # Now we generate the output
+    output = listmodel(owner_real_name=listmetadata[u'owner_real_name'],
+        owner_email=listmetadata[u'owner_email'],
+        vmic_url=listmetadata[u'vmic_url'],
+        images=allimages
+        )
+    return output
 class vmlistview:
     def load_file(self,filename):
-        #print "filename=%s" % (filename)
         loadedfile = None
         with open(filename, 'r') as fp:
             loadedfile = json.load(fp)
-            requiredkeys = [u'metadata', u'images']
-            requiredkeysset = set(requiredkeys)
-            if not requiredkeysset.issubset(loadedfile.keys()):
+            decoded_image = VMimageListDecoder(loadedfile)
+            if decoded_image == False:
                 return False
-            listmetadata = loadedfile[u'metadata']
-            requiredmetadata = [u'owner_real_name',
-                u'owner_real_name',
-                u'owner_email',
-                u'vmic_url']
-            requiredmetadataset = set(requiredmetadata)
-            if not requiredmetadataset.issubset(listmetadata.keys()):
-                return False
-            images = loadedfile[u'images']
-            allimages = []
-            for image in images:
-                translatedimage = VMimageDecoder(image)
-                allimages.append(translatedimage)
-            output = listmodel(owner_real_name=listmetadata[u'owner_real_name'],
-                owner_email=listmetadata[u'owner_email'],
-                vmic_url=listmetadata[u'vmic_url'],
-                )
-            output.images = allimages
-            return output
-
+            return decoded_image
         return False
+        
     def save_file(self,entry,filename):
         with open(filename, 'w') as f:
             json.dump(entry, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
@@ -177,20 +186,26 @@ class vmlistcontroler:
         for i in todelete:
             del self.model.images[i]
         return True
+        
     def verify(self):
         if 0 == len(self.model.images):
+            print "No images in data no point signing"
             return False
         requiredmetadata = [u'owner_real_name',
             u'owner_email',
-            u'vmic_url',
-            u'vmi_url']
+            u'vmic_url']
         requiredmetadataset = set(requiredmetadata)
         if not requiredmetadataset.issubset(self.model.metadata.keys()):
+            print "missing metadata"
             return False
+        
         for item in requiredmetadata:
             value = self.model.metadata[item]
             if value == None:
+                print "image list metadat set to null '%s'" % (item)
                 return False
+        return True
+        
     def sign(self,signer_key,signer_cert,outfile):
         content = self.view.dumps(self.model)
         
