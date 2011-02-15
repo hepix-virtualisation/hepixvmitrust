@@ -1,7 +1,7 @@
 Basic usage
 ~~~~~~~~~~~
 
-Thsi is an alpha peice of code showing the basis of signing meta data about a file
+This is an alpha piece of code showing the basis of signing meta data about a file
 
 $python vmilisttool.py -h
 Usage: vmilisttool.py [options]
@@ -29,29 +29,29 @@ Options:
 
 
 
-Instalation on Redhat Enterprise Linux 5/ SL5 or Centos 5
+Installation on Redhat Enterprise Linux 5/ SL5 or Centos 5
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First install Extended Packages for Enterprise Linux (EPEL).
 
 rpm -i http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm
 
-Install the dependacies from EPEL.
+Install the dependencies from EPEL.
 
 yum install python-simplejson  python-hashlib
 
-Now the depednacies are resolved the script shodul now run
+Now the dependencies are resolved the script should now run
 
 Basic usage
 ~~~~~~~~~~~
 
-(1) Create a template for the imagelist.
+(1) Create a template for the image list.
 
 python vmilisttool.py -j output.json
 
 Edit the file output.json adding your list metadata so no 'null' entries exist.
 
-(2) Create a template for an imaghe referance.
+(2) Create a template for an image reference.
 
 python vmilisttool.py -g vm.json
 
@@ -61,7 +61,7 @@ Edit the file output.json adding your list metadata so no 'null' entries exist.
 
 python vmilisttool.py  -t output.json  -a vm.json -j murged.json
 
-(4) Signing the now assmbled metadata list.
+(4) Signing the now assembled metadata list.
 
 python vmilisttool.py  -t murged.json -s signed_image_list
 
