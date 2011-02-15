@@ -26,3 +26,109 @@ Options:
   -s SIGN, --sign=SIGN  returns verbose output
   -f FORMAT, --format=FORMAT
                         Set the format valid values are JSON and XML
+
+
+A typical image list looks like such
+
+
+$cat imagelist.json 
+{
+    "images": [
+        {
+            "metadata": {
+                "vmi_description": "easy to run vm", 
+                "vmi_disk_size": "20e12bytes", 
+                "vmi_hash_sha512": "bignum", 
+                "vmi_hypervisor": "kvm", 
+                "vmi_os_architecture": "i386", 
+                "vmi_os_version": "sl6.0201101", 
+                "vmi_uid": "32455374", 
+                "vmi_url": "http://www.yokel.org"
+            }
+        }
+    ], 
+    "metadata": {
+        "owner_email": "owen.synge@yokel.org", 
+        "owner_real_name": "Owen Synge", 
+        "vmic_url": "www.yokel.org"
+    }
+}
+
+
+and when signed like this.
+
+MIME-Version: 1.0
+Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg="sha1"; boundary="----C1DB4AB8BA98A2EFE431D62C7A3261C7"
+
+This is an S/MIME signed message
+
+------C1DB4AB8BA98A2EFE431D62C7A3261C7
+{
+    "images": [
+        {
+            "metadata": {
+                "vmi_description": "easy to run vm", 
+                "vmi_disk_size": "20e12bytes", 
+                "vmi_hash_sha512": "bignum", 
+                "vmi_hypervisor": "kvm", 
+                "vmi_os_architecture": "i386", 
+                "vmi_os_version": "sl6.0201101", 
+                "vmi_uid": "32455374", 
+                "vmi_url": "http://www.yokel.org"
+            }
+        }
+    ], 
+    "metadata": {
+        "owner_email": "owen.synge@yokel.org", 
+        "owner_real_name": "Owen Synge", 
+        "vmic_url": "www.yokel.org"
+    }
+}
+------C1DB4AB8BA98A2EFE431D62C7A3261C7
+Content-Type: application/pkcs7-signature; name="smime.p7s"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="smime.p7s"
+
+MIIHdAYJKoZIhvcNAQcCoIIHZTCCB2ECAQExCzAJBgUrDgMCGgUAMAsGCSqGSIb3
+DQEHAaCCBSUwggUhMIIECaADAgECAgIomzANBgkqhkiG9w0BAQUFADA2MQswCQYD
+VQQGEwJERTETMBEGA1UEChMKR2VybWFuR3JpZDESMBAGA1UEAxMJR3JpZEthLUNB
+MB4XDTEwMDEwNTE1MTkyMloXDTExMDIwNDE1MTkyMlowRjELMAkGA1UEBhMCREUx
+EzARBgNVBAoTCkdlcm1hbkdyaWQxDTALBgNVBAsTBERFU1kxEzARBgNVBAMTCk93
+ZW4gU3luZ2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCwrhgUz/5s
+E0TJwtZbRbc/Pt8Ti7B7nyMsB8PQsi6aKzsdRaxNgbSmvZwSzU8EzdwXN8YhfLob
+GWE1agyngcobC8wdC1gK4pl8U1/rzt/wYXtT6FDCQgew2srj63/AzblVcf+eIaU4
+qZNHTcemNiagdRObdLlx5XF9RxHZaj5z6d2i6V45Gk0K2B9pMdSWQ7DxqFGEiAJj
+LTWGxlxYyAe7QvqMt8ovzNzcp+dagKDOTflh1/22xHCI8E2E7d1p8anfqA0iz/Kp
+etvKkAxDfq6/ANP3cHe0E6P0xQr9hrvBLVqDs7rXFweYT4NExN5qMl/3QKN8HEo8
+NqB0L81EZdZLAgMBAAGjggInMIICIzAMBgNVHRMBAf8EAjAAMA4GA1UdDwEB/wQE
+AwIE8DAdBgNVHQ4EFgQUpvUfn9v7vTkk4Arr2DREBCFwYa4wXgYDVR0jBFcwVYAU
+xnXJKKzRC/w8/7m1HtNfO4BiEjShOqQ4MDYxCzAJBgNVBAYTAkRFMRMwEQYDVQQK
+EwpHZXJtYW5HcmlkMRIwEAYDVQQDEwlHcmlkS2EtQ0GCAQAwHQYDVR0RBBYwFIES
+b3dlbi5TeW5nZUBkZXN5LmRlMB8GA1UdEgQYMBaBFGdyaWRrYS1jYUBpd3IuZnpr
+LmRlMDUGA1UdHwQuMCwwKqAooCaGJGh0dHA6Ly9ncmlkLmZ6ay5kZS9jYS9ncmlk
+a2EtY3JsLmRlcjAaBgNVHSAEEzARMA8GDSsGAQQBlDarLAEBAQUwEQYJYIZIAYb4
+QgEBBAQDAgWgME4GCWCGSAGG+EIBDQRBFj9DZXJ0aWZpY2F0ZSBpc3N1ZWQgdW5k
+ZXIgQ1AvQ1BTIHYuIDEuNSBhdCBodHRwOi8vZ3JpZC5memsuZGUvY2EwJAYJYIZI
+AYb4QgECBBcWFWh0dHA6Ly9ncmlkLmZ6ay5kZS9jYTAzBglghkgBhvhCAQgEJhYk
+aHR0cDovL2dyaWQuZnprLmRlL2NhL2dyaWRrYS1jcHMucGRmMDMGCWCGSAGG+EIB
+AwQmFiRodHRwOi8vZ3JpZC5memsuZGUvY2EvZ3JpZGthLWNybC5kZXIwDQYJKoZI
+hvcNAQEFBQADggEBAC38bU92oulqPH4oBR6CrUuuMwMJM0UOE4xGxFwDQly0+dog
+LZRGM5f5FO4YItTkRS9E1kztAx23v2BVxoksKPF2sD8M8xlUJJEKySCimNBSeGJ9
+SNe8tYHOhCN15a10RUmP1LWYNn9ZHCHGVgwoYoJj4rddz6/To5/O0X3IuARrwF5A
+AJ3Y57nkT0oyyEtmHOz1eRKi5+vgmJiPGP2uyObC37hftlTUVbYjG9xxqhtO4os9
+0iZluEzip2SPAN6fAnapH5fALt3CesyuRpo+O+2/OGHS9IB1aMrlg/UZblOKUD4P
+eNqZBinlbo3MOjURyjUMlJwKVijumA56kxe1pssxggIXMIICEwIBATA8MDYxCzAJ
+BgNVBAYTAkRFMRMwEQYDVQQKEwpHZXJtYW5HcmlkMRIwEAYDVQQDEwlHcmlkS2Et
+Q0ECAiibMAkGBSsOAwIaBQCggbEwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
+BgkqhkiG9w0BCQUxDxcNMTEwMjE1MTA1ODM2WjAjBgkqhkiG9w0BCQQxFgQUTJBL
+LKKvSg7fX7G8LPodr3Ob6sswUgYJKoZIhvcNAQkPMUUwQzAKBggqhkiG9w0DBzAO
+BggqhkiG9w0DAgICAIAwDQYIKoZIhvcNAwICAUAwBwYFKw4DAgcwDQYIKoZIhvcN
+AwICASgwDQYJKoZIhvcNAQEBBQAEggEAQ2Y2/cx1Cg+U1xab0CFJ5iQvOwFdVOpc
+oY9h9c6aylWIVuprEOV7uUEXcBqQ05zw8tsGT/6ThAnSp52QAZ+y5GEiDu8bLybx
+qGmUTZDHRl9Il7siXrh4idJuIUIZByMm27/7cyRkG1Tq4vQQxZN7HCPaHntL+mSn
+ZPANo/aBifU0Elx6VBQ8gmZVDarMT17L39Wmg/XacjzntolpFJ4vnVp6Arm5EQWR
+opwoAmRVmzsBz4nnHdzbAA3UT24SR8Up0epLY//1wy68cSZej1d+mST11VfUxMKg
+XqLbEv2ZGMXeUG5K7CoNCZiXK3AIY8dlTP4qhV1IlQxoBcT7JPzm+w==
+
+------C1DB4AB8BA98A2EFE431D62C7A3261C7--
+

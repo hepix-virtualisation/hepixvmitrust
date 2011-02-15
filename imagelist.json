@@ -1,0 +1,21 @@
+{
+    "images": [
+        {
+            "metadata": {
+                "vmi_description": "easy to run vm", 
+                "vmi_disk_size": "20e12bytes", 
+                "vmi_hash_sha512": "bignum", 
+                "vmi_hypervisor": "kvm", 
+                "vmi_os_architecture": "i386", 
+                "vmi_os_version": "sl6.0201101", 
+                "vmi_uid": "32455374", 
+                "vmi_url": "http://www.yokel.org"
+            }
+        }
+    ], 
+    "metadata": {
+        "owner_email": "owen.synge@yokel.org", 
+        "owner_real_name": "Owen Synge", 
+        "vmic_url": "www.yokel.org"
+    }
+}
