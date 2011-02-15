@@ -49,11 +49,21 @@ Basic usage
 
 python vmilisttool.py -j output.json
 
-Next edit the file output.json adding your list metadata so no 'null' entries exist.
+Edit the file output.json adding your list metadata so no 'null' entries exist.
 
 (2) Create a template for an imaghe referance.
 
+python vmilisttool.py -g vm.json
 
+Edit the file output.json adding your list metadata so no 'null' entries exist.
+
+(3) Add the vm metadata to the image
+
+python vmilisttool.py  -t output.json  -a vm.json -j murged.json
+
+(4) Signing the now assmbled metadata list.
+
+python vmilisttool.py  -t murged.json -s signed_image_list
 
 Example metadata files
 ~~~~~~~~~~~~~~~~~~~~~~
