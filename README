@@ -38,7 +38,7 @@ rpm -i http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch
 
 Install the dependencies from EPEL.
 
-yum install python-simplejson  python-hashlib
+yum install python-simplejson  python-hashlib m2crypto
 
 Now the dependencies are resolved the script should now run
 

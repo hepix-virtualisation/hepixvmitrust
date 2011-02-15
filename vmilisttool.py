@@ -210,7 +210,7 @@ class vmlistcontroler:
         for item in requiredmetadata:
             value = self.model.metadata[item]
             if value == None:
-                print "image list metadat set to null '%s'" % (item)
+                print "image list metadata set to null '%s'" % (item)
                 return False
         return True
         
@@ -222,11 +222,7 @@ class vmlistcontroler:
         buf = BIO.MemoryBuffer(content)        
         p7 = self.SMIME.sign(buf, SMIME.PKCS7_DETACHED)
         buf = BIO.MemoryBuffer(content)
-        # Output p7 in mail-friendly format.
         out = BIO.MemoryBuffer()
-        #out.write('From: sender@example.dom\n')
-        #out.write('To: recipient@example.dom\n')
-        #out.write('Subject: M2Crypto S/MIME testing\n')
         self.SMIME.write(out, p7, buf)
         self.message_signed = str(out.read())
         f = open(outfile, 'w')
@@ -317,6 +313,11 @@ def main():
     if options.generate:
         generate_list = options.generate
         actions.append('generate')
+    if options.format:
+        print "Currently only supports JSON output RDF XML output may come later"
+    
+    # Now process the actions.
+    
     if 'generate' in actions:
         image = imagemodel()
         for filename in generate_list:
