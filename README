@@ -28,6 +28,36 @@ Options:
                         Set the format valid values are JSON and XML
 
 
+
+Instalation on Redhat Enterprise Linux 5/ SL5 or Centos 5
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+First install Extended Packages for Enterprise Linux (EPEL).
+
+rpm -i http://download.fedora.redhat.com/pub/epel/5/i386/epel-release-5-4.noarch.rpm
+
+Install the dependacies from EPEL.
+
+yum install python-simplejson  python-hashlib
+
+Now the depednacies are resolved the script shodul now run
+
+Basic usage
+~~~~~~~~~~~
+
+(1) Create a template for the imagelist.
+
+python vmilisttool.py -j output.json
+
+Next edit the file output.json adding your list metadata so no 'null' entries exist.
+
+(2) Create a template for an imaghe referance.
+
+
+
+Example metadata files
+~~~~~~~~~~~~~~~~~~~~~~
+
 A typical image list looks like such
 
 

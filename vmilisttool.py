@@ -55,7 +55,7 @@ class listmodel:
 class VMimageListEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, imagemodel):
-            return {'metadata' : obj.metadata}
+            return {u'metadata' : obj.metadata}
         if isinstance(obj, listmodel):
             imagelist = []
             for i in obj.images:
@@ -64,13 +64,17 @@ class VMimageListEncoder(json.JSONEncoder):
                     return json.JSONEncoder.default(self, obj)
                 else:
                     imagelist.append(self.default(i))
-            return {'metadata' : obj.metadata, 'images' : imagelist}
+            return {u'metadata' : obj.metadata, u'images' : imagelist}
         return json.JSONEncoder.default(self, obj)
 
 def VMimageDecoder(dct):
     if not u'metadata' in dct.keys():
         return None
     metadata = dct[u'metadata']
+    if metadata == None:
+        print dct
+        
+        return None
     requiredmetadata = [u'vmi_uid',
         u'vmi_url',
         u'vmi_hash_sha512',
@@ -121,17 +125,17 @@ def VMimageListDecoder(dct):
 class vmlistview:
     def load_file(self,filename):
         loadedfile = None
-        with open(filename, 'r') as fp:
-            loadedfile = json.load(fp)
-            decoded_image = VMimageListDecoder(loadedfile)
-            if decoded_image == False:
-                return False
-            return decoded_image
-        return False
+        fp = open(filename, 'r')
+
+        loadedfile = json.load(fp)
+        decoded_image = VMimageListDecoder(loadedfile)
+        if decoded_image == False:
+            return False
+        return decoded_image
         
     def save_file(self,entry,filename):
-        with open(filename, 'w') as f:
-            json.dump(entry, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
+        f = open(filename, 'w')
+        json.dump(entry, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
         return True
     def images_list(self,entry):
         #print "frod=%s" % (entry)
@@ -166,9 +170,13 @@ class vmlistcontroler:
             return False
         return self.view.images_list(self.model)
     def image_add(self,filename):
-        with open(filename, 'r') as f:
-            fred = json.load(f,object_hook=VMimageDecoder)
-            self.model.images.append(fred)
+        f = open(filename, 'r')
+        json_stuff = json.load(f)
+        fred= VMimageDecoder(json_stuff)
+        if fred == None:
+            return False
+        self.model.images.append(fred)
+        return True
         
     def image_del(self,uuid):
         matchuuid = None
@@ -221,8 +229,8 @@ class vmlistcontroler:
         #out.write('Subject: M2Crypto S/MIME testing\n')
         self.SMIME.write(out, p7, buf)
         self.message_signed = str(out.read())
-        with open(outfile, 'w') as f:
-            f.write(self.message_signed )
+        f = open(outfile, 'w')
+        f.write(self.message_signed )
         # Save the PRNG's state.
 def test_things():
     view = vmlistview()
@@ -312,8 +320,8 @@ def main():
     if 'generate' in actions:
         image = imagemodel()
         for filename in generate_list:
-            with open(filename, 'w') as f:
-                json.dump(image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
+            f = open(filename, 'w')
+            json.dump(image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
         
     if 'load_template' in actions:
         listcontroler.load(template)
