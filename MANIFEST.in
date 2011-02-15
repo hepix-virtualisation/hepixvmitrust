@@ -1,2 +1,3 @@
 include env.sh
 include README
+include vmilisttool.py

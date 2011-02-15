@@ -5,8 +5,6 @@ setup(name='desy-grid-vmis',
     author="O M Synge",
     author_email="owen.Synge@desy.de",
     url="www-it.desy.de",
-    scripts = ["vmilisttool.py"],
-    package_dir={'': '.'},
     data_files=[('/usr/bin/', ['vmilisttool.py']),
         ('/usr/share/doc/vmilisttool',['README','env.sh'])]
     )
