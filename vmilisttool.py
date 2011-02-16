@@ -25,14 +25,14 @@ class imagemodel:
         vmi_disk_size=None,
         ):
         
-        self.metadata = {'vmi_uid' : vmi_uid,
-            'vmi_url' : vmi_url,
-            'vmi_hash_sha512' :vmi_hash_sha512,
-            'vmi_hypervisor' : vmi_hypervisor,
-            'vmi_description' : vmi_description,
-            'vmi_os_version' : vmi_os_version,
-            'vmi_os_architecture' : vmi_os_architecture,
-            'vmi_disk_size' : vmi_disk_size}
+        self.metadata = {u'vmi_uid' : vmi_uid,
+            u'vmi_url' : vmi_url,
+            u'vmi_hash_sha512' :vmi_hash_sha512,
+            u'vmi_hypervisor' : vmi_hypervisor,
+            u'vmi_description' : vmi_description,
+            u'vmi_os_version' : vmi_os_version,
+            u'vmi_os_architecture' : vmi_os_architecture,
+            u'vmi_disk_size' : vmi_disk_size}
 
 
 class listmodel:
@@ -42,9 +42,9 @@ class listmodel:
         vmic_url=None,
         images=[]):
         self.metadata = {
-            'owner_real_name' : owner_real_name,
-            'owner_email' : owner_email,
-            'vmic_url' : vmic_url,
+            u'owner_real_name' : owner_real_name,
+            u'owner_email' : owner_email,
+            u'vmic_url' : vmic_url,
             }
         self.images = images
 
@@ -72,7 +72,7 @@ def VMimageDecoder(dct):
         return None
     metadata = dct[u'metadata']
     if metadata == None:
-        print dct
+        print "coding error=%s" % (dct)
         
         return None
     requiredmetadata = [u'vmi_uid',
@@ -114,7 +114,8 @@ def VMimageListDecoder(dct):
     allimages = []
     for image in images:
         translatedimage = VMimageDecoder(image)
-        allimages.append(translatedimage)
+        if not translatedimage == None:
+            allimages.append(translatedimage)
     # Now we generate the output
     output = listmodel(owner_real_name=listmetadata[u'owner_real_name'],
         owner_email=listmetadata[u'owner_email'],
@@ -122,6 +123,22 @@ def VMimageListDecoder(dct):
         images=allimages
         )
     return output
+
+def file_extract_metadata(file_name):
+    if file_name == None:
+        return
+    if not os.path.isfile(file_name):
+        return None
+    m = hashlib.sha512()
+    filelength = 0
+    for line in open(file_name,'r'):
+        filelength += len(line)
+        m.update(line) 
+    return {u'vmi_disk_size' : filelength, 
+            u'vmi_hash_sha512' : m.hexdigest()}
+
+
+
 class vmlistview:
     def load_file(self,filename):
         loadedfile = None
@@ -147,6 +164,8 @@ class vmlistview:
             print item.metadata[u'vmi_uid']
     def dumps(self,entry):
         return json.dumps(entry, cls=VMimageListEncoder, sort_keys=True, indent=4)
+
+
 
 class vmlistcontroler:
     def __init__(self):
@@ -228,6 +247,23 @@ class vmlistcontroler:
         f = open(outfile, 'w')
         f.write(self.message_signed )
         # Save the PRNG's state.
+    def generate(self,filename,imagepath=None):
+        output_image = None
+
+        if imagepath!=None:
+
+            metadata = file_extract_metadata(imagepath)
+            if metadata == None:
+                print "error reading file '%s'." % (imagename)
+                sys.exit(1)
+            output_image = imagemodel(
+                vmi_hash_sha512= metadata[u'vmi_hash_sha512'],
+                vmi_disk_size=metadata[u'vmi_disk_size'])
+        else:
+            output_image = imagemodel()
+        f = open(filename, 'w')
+        json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
+
 def test_things():
     view = vmlistview()
     loadedlist = view.load_file('imagelist.json')
@@ -258,11 +294,33 @@ def test_things():
     view.save_file(avmlist,'imagelist.json')
 
 
+# User interface
+
+def pairsNnot(list_a,list_b):
+    len_generate_list = len(list_a)
+    len_image_list = len(list_b)
+    ocupies_generate_list = set(range(len_generate_list))
+    ocupies_image_list = set(range(len_image_list))
+    ocupies_pairs = ocupies_image_list.intersection(ocupies_generate_list)
+    diff_a = ocupies_generate_list.difference(ocupies_image_list)
+    diff_b = ocupies_image_list.difference(ocupies_generate_list)
+    arepairs = []
+    for i in ocupies_pairs:
+        arepairs.append([list_a[i],list_b[i]])
+    notpairs_a = []
+    for i in diff_a:
+        notpairs_a.append(list_a[i])
+    notpairs_b = []
+    for i in diff_b:
+        notpairs_b.append(list_b[i])
+    
+    return arepairs,notpairs_a,notpairs_b
+
 
 
 def main():
     """Runs program and handles command line options"""
-    actions = []
+    actions = set([])
     listcontroler = vmlistcontroler()
     p = optparse.OptionParser()
     p.add_option('-j', '--json', action ='store', help='Path of the json output file')
@@ -280,6 +338,7 @@ def main():
     options, arguments = p.parse_args()
     template = 'imagelist.json'
     json_output = 'imagelist.json'
+    generate_list = []
     add_image_file = []
     del_image_metadata = []
     format = None
@@ -287,64 +346,70 @@ def main():
     signer_cert = os.environ['HOME'] + '/.globus/usercert.pem'
     signed_output = None
     list_images = False
+    imagelist = []
     if options.template:
         template = options.template
-        actions.append('load_template')
+        actions.add('load_template')
     if options.json:
         json_output = options.json
-        actions.append('save')
+        actions.add('save')
     if options.add:
         add_image_file = options.add
-        actions.append('image_add')
+        actions.add('image_add')
     if options.delete:
         del_image_file = options.delete
-        actions.append('image_del')
+        actions.add('image_del')
     if options.list:
         list_images = True
-        actions.append('image_list')
+        actions.add('image_list')
     if options.signer_key:
         signer_key = options.signer_key
     if options.signer_certificate:
         signer_cert = options.signer_certificate
     if options.sign:
-        actions.append('verify')
-        actions.append('sign')
+        actions.add('verify')
+        actions.add('sign')
         signed_output = options.sign
     if options.generate:
         generate_list = options.generate
-        actions.append('generate')
+        actions.add('generate')
     if options.format:
         print "Currently only supports JSON output RDF XML output may come later"
-    
+    if options.image:
+        imagelist = options.image
+        actions.add('generate')
+        
     # Now process the actions.
     
-    if 'generate' in actions:
-        image = imagemodel()
-        for filename in generate_list:
-            f = open(filename, 'w')
-            json.dump(image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
-        
-    if 'load_template' in actions:
+    if actions.__contains__('generate'):
+        pairs, extra_gens ,extra_images = pairsNnot(generate_list,imagelist)
+        if len(extra_images) > 0:
+            print "error images and no target"
+        for paired_items in pairs:    
+            listcontroler.generate(paired_items[0],paired_items[1])
+        for gen_it in extra_gens:
+            listcontroler.generate(gen_it)
+    if actions.__contains__('load_template'):
         listcontroler.load(template)
-    if 'image_add' in actions:
+    if actions.__contains__('image_add'):
         for item in add_image_file:
             listcontroler.image_add(item)
-    if 'image_del' in actions:
+    if actions.__contains__('image_del'):
         for item in del_image_file:
             success = listcontroler.image_del(item)
             if success == False:
                 print "Failed to delete image '%s'" % (item)
                 sys.exit(1)
-    if 'image_list' in actions:
+    if actions.__contains__('image_list'):
         listcontroler.images_list()
-    if 'verify' in actions:
+    if actions.__contains__('verify'):
         success = listcontroler.verify()
         if success == False:
             print "Failed to verify valid meta data for image."
             sys.exit(1)
-    if 'sign' in actions:
+    if actions.__contains__('sign'):
         listcontroler.sign(signer_key,signer_cert,signed_output)
-    if 'save' in actions:
+    if actions.__contains__('save'):
         listcontroler.save(json_output)
     #test_things()
 if __name__ == "__main__":
