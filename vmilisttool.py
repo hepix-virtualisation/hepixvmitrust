@@ -1,16 +1,22 @@
 #!/usr/bin/env python
-try:
-    import json
-except ImportError:
-    import simplejson as json 
-import codecs
 
+import codecs
 import optparse
 import os
 import sys
 import hashlib
 import os.path
+# needed to the signing of images.
 from M2Crypto import BIO, Rand, SMIME
+
+# simplejson is included with Python 2.6 and above
+# with the name json
+if float(sys.version[:3]) >= 2.6:
+    import json
+else:
+    # python 2.4 or 2.5 can also import simplejson
+    # as working alternative to the json included.
+    import simplejson as json
 
 class imagemodel:
     interestingkeys = set([u'vmi_uid'])
