@@ -1,0 +1,89 @@
+2011-03-07 12:04  omsynge
+
+	* README: Small documentation upgrade showing how to auto caclulate
+	  the checksum of the image
+
+2011-03-07 12:03  omsynge
+
+	* vmilisttool.py: Small update accounting for the difficulties and
+	  confusion including json or simplejson on different operating
+	  systems
+
+2011-02-16 10:30  omsynge
+
+	* vmilisttool.py: Merging from Home coding.
+	  Added generate function including auto generating checksum and
+	  file number.
+	  Added file_extract_metadata(file_name) to checksum and count the
+	  content of files.
+	  Some defensive code additions.
+	  Changed all strings to UTF8
+	  Changed actions handling from list to set as it was being used as
+	  a set.
+	  Created 'pairsNnot' function to output paired command attributes.
+
+2011-02-15 14:37  omsynge
+
+	* README, vmilisttool.py: some feedback from Andrew Elwell
+
+2011-02-15 13:48  omsynge
+
+	* README: spelling fixed for documentation
+
+2011-02-15 12:00  omsynge
+
+	* README: added soem more to the readme on how to sign images
+
+2011-02-15 11:56  omsynge
+
+	* README, vmilisttool.py: update to port to sl5
+
+2011-02-15 11:00  omsynge
+
+	* README, imagelist.json: A coupele of clean ups prerelease
+
+2011-02-15 10:55  omsynge
+
+	* setup.py: bump release version
+
+2011-02-15 10:55  omsynge
+
+	* MANIFEST.in, setup.py, vmimagesigner: last clean up before
+	  release
+
+2011-02-15 10:52  omsynge
+
+	* vmis: deleteing garbidge files
+
+2011-02-15 10:49  omsynge
+
+	* MANIFEST.in, README, setup.py, vmilisttool.py, vmis/__init__.py,
+	  vmis/json_encoder.py, vmis/listmaker.py, vmis/sign2.py: now it
+	  still builds a package
+
+2011-02-15 10:37  omsynge
+
+	* vmis/listmaker.py: Code writern last night in hg. This is soem
+	  code cleanup and makes thigns neater
+
+2011-02-14 18:25  omsynge
+
+	* vmis/listmaker.py: a new version now supports signing the the
+	  metadata
+
+2011-02-14 17:48  omsynge
+
+	* vmis/listmaker.py: first import of work i wrote at weekend
+
+2011-02-09 16:08  omsynge
+
+	* MANIFEST.in, image_signer.py, json_encoder.py, setup.py,
+	  sign2.py, vmimagesigner, vmis, vmis/__init__.py,
+	  vmis/json_encoder.py, vmis/sign2.py: we shodul now have an RPM we
+	  can build from
+
+2011-02-07 13:46  omsynge
+
+	* ., README, env.sh, image_signer.py, json_encoder.py, sign2.py:
+	  adding first version of tool for signing image file
+

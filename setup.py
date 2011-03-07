@@ -6,5 +6,5 @@ setup(name='desy-grid-vmis',
     author_email="owen.Synge@desy.de",
     url="www-it.desy.de",
     data_files=[('/usr/bin/', ['vmilisttool.py']),
-        ('/usr/share/doc/vmilisttool',['README','env.sh'])]
+        ('/usr/share/doc/vmilisttool',['README','ChangeLog','imagelist.json'])]
     )
