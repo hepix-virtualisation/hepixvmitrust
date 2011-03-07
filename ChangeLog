@@ -1,3 +1,17 @@
+2011-03-07 18:03  omsynge
+
+	* setup.py: make the script vmilisttool.py executable
+
+2011-03-07 17:31  omsynge
+
+	* setup.py: tagging a release
+
+2011-03-07 17:11  omsynge
+
+	* ChangeLog, MANIFEST.in, env.sh, setup.py: some repackaging,
+	  removing env.sh and adding a ChangeLog via svn2cl and an example
+	  imagelist.json
+
 2011-03-07 12:04  omsynge
 
 	* README: Small documentation upgrade showing how to auto caclulate
