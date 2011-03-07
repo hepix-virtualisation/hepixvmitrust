@@ -42,6 +42,14 @@ yum install python-simplejson  python-hashlib m2crypto
 
 Now the dependencies are resolved the script should now run
 
+Installation on debian 6.0 (squeeze)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All the dependacies are available in the debian repository.
+
+aptitude install python-m2crypto
+
+
 Basic usage
 ~~~~~~~~~~~
 
@@ -53,7 +61,7 @@ Edit the file output.json adding your list metadata so no 'null' entries exist.
 
 (2) Create a template for an image reference.
 
-python vmilisttool.py -g vm.json
+python vmilisttool.py -g vm.json -i /path/to/you/image
 
 Edit the file output.json adding your list metadata so no 'null' entries exist.
 
