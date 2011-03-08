@@ -8,7 +8,7 @@ import hashlib
 import os.path
 # needed to the signing of images.
 from M2Crypto import BIO, Rand, SMIME
-
+import uuid
 # simplejson is included with Python 2.6 and above
 # with the name json
 if float(sys.version[:3]) >= 2.6:
@@ -18,115 +18,150 @@ else:
     # as working alternative to the json included.
     import simplejson as json
 
-class imagemodel:
-    interestingkeys = set([u'vmi_uid'])
-    def __init__(self,
-        vmi_uid=None,
-        vmi_url=None,
-        vmi_hash_sha512=None,
-        vmi_hypervisor=None,
-        vmi_description=None,
-        vmi_os_version=None,
-        vmi_os_architecture=None,
-        vmi_disk_size=None,
-        ):
-        
-        self.metadata = {u'vmi_uid' : vmi_uid,
-            u'vmi_url' : vmi_url,
-            u'vmi_hash_sha512' :vmi_hash_sha512,
-            u'vmi_hypervisor' : vmi_hypervisor,
-            u'vmi_description' : vmi_description,
-            u'vmi_os_version' : vmi_os_version,
-            u'vmi_os_architecture' : vmi_os_architecture,
-            u'vmi_disk_size' : vmi_disk_size}
 
+endorser_required_metadata = [u'hv:ca',
+        u'hv:dn',
+        u'hv:email',
+        u'dc:creator',
+    ]
+endorser_required_metadata_set = set(endorser_required_metadata)
+
+image_required_metadata = [u'dc:title',
+        u'dc:description',
+        u'hv:size',
+        u'sl:checksum:sha512',
+        u'sl:arch',
+        u'hv:uri',
+        u'dc:identifier',
+        u'sl:os',
+        u'sl:osversion',
+        u'sl:comments',
+        u'hv:hypervisor',
+        u'hv:version',
+    ]
+image_required_metadata_set = set(image_required_metadata)
+
+
+imagelist_required_metadata = [u'dc:date:created',
+        u'dc:date:expires',
+        u'dc:identifier',
+        u'dc:description',
+        u'dc:title',
+        u'dc:source',
+        u'hv:version',
+    ]
+imagelist_required_metadata_set = set(imagelist_required_metadata)
+
+
+class endorsermodel:
+    def __init__(self,metadata = {}):
+        self.metadata = metadata
+
+
+class imagemodel:    
+    def __init__(self,metadata = {}):
+        self.metadata = metadata
 
 class listmodel:
     interestingkeys = set([u'vmi_uid'])
-    def __init__(self,owner_real_name=None,
-        owner_email=None,
-        vmic_url=None,
-        images=[]):
-        self.metadata = {
-            u'owner_real_name' : owner_real_name,
-            u'owner_email' : owner_email,
-            u'vmic_url' : vmic_url,
-            }
+    def __init__(self,metadata = {},images=[],endorser=endorsermodel()):
+        self.endorser = endorser
+        self.metadata = metadata
         self.images = images
 
-
-
-
-
+        
 class VMimageListEncoder(json.JSONEncoder):
     def default(self, obj):
+        if isinstance(obj, endorsermodel):
+            return self.vm_endorser_encode(obj)
         if isinstance(obj, imagemodel):
-            return {u'metadata' : obj.metadata}
+            return self.vm_image_encode(obj)
         if isinstance(obj, listmodel):
-            imagelist = []
-            for i in obj.images:
-                tmp_data = self.default(i)
-                if tmp_data == None:
-                    return json.JSONEncoder.default(self, obj)
-                else:
-                    imagelist.append(self.default(i))
-            return {u'metadata' : obj.metadata, u'images' : imagelist}
-        return json.JSONEncoder.default(self, obj)
+            return self.vm_imagelist_encode(obj)            
+        return json.JSONEncoder.default(obj)
 
-def VMimageDecoder(dct):
-    if not u'metadata' in dct.keys():
+    def vm_image_encode(self, obj):
+        if not obj.metadata.has_key(u'dc:identifier'):
+            obj.metadata[u'dc:identifier'] = str(uuid.uuid4())
+        for field in image_required_metadata:
+            if not obj.metadata.has_key(field):
+                obj.metadata[field] = ''
+        return {u'hv:image' : obj.metadata}
+
+    def vm_imagelist_encode(self, obj):    
+        if not obj.metadata.has_key(u'dc:identifier'):
+            obj.metadata[u'dc:identifier'] = str(uuid.uuid4())
+        imagelist = []
+        for i in obj.images:
+            tmp_data = self.default(i)
+            if tmp_data == None:
+                return json.JSONEncoder.default(self, obj)
+            else:
+                imagelist.append(self.default(i))
+        for field in imagelist_required_metadata:
+            if not obj.metadata.has_key(field):
+                obj.metadata[field] = ''
+        output = {u'hv:images' : imagelist,
+            u'hv:endorser' : self.default(obj.endorser)}
+        for key in obj.metadata.keys():
+            output[key] = obj.metadata[key]
+        return output
+    
+    def vm_endorser_encode(self, obj):
+        for field in endorser_required_metadata:
+            if not obj.metadata.has_key(field):
+                obj.metadata[field] = ''
+        return {u'hv:x509' : obj.metadata}
+
+def VMendorserDecoder(dct):
+    if not u'hv:x509' in dct.keys():
         return None
-    metadata = dct[u'metadata']
+    metadata = dct[u'hv:x509']
     if metadata == None:
         print "coding error=%s" % (dct)
-        
         return None
-    requiredmetadata = [u'vmi_uid',
-        u'vmi_url',
-        u'vmi_hash_sha512',
-        u'vmi_hypervisor',
-        u'vmi_description',
-        u'vmi_os_version',
-        u'vmi_os_architecture',
-        u'vmi_disk_size']
-    requiredmetadataset = set(requiredmetadata)
-    if not requiredmetadataset.issubset(metadata.keys()):
-        
+    if not endorser_required_metadata_set.issubset(metadata.keys()):    
+        print "coding error2=%s" % (dct)
         return None
-    return imagemodel(vmi_uid=metadata[u'vmi_uid'],
-        vmi_url=metadata[u'vmi_url'],
-        vmi_hash_sha512=metadata[u'vmi_hash_sha512'],
-        vmi_hypervisor=metadata[u'vmi_hypervisor'],
-        vmi_description=metadata[u'vmi_description'],
-        vmi_os_version=metadata[u'vmi_os_version'],
-        vmi_os_architecture=metadata[u'vmi_os_architecture'],
-        vmi_disk_size=metadata[u'vmi_disk_size']
-        )
+    #print "VMendorserDecoder.metadata=%s" % (metadata)
+    return endorsermodel(metadata=metadata)
+
+def VMimageDecoder(dct):
+    if not u'hv:image' in dct.keys():
+        return None
+    metadata = dct[u'hv:image']
+    if metadata == None:
+        print "coding error=%s" % (dct)
+        return None
+    if not image_required_metadata_set.issubset(metadata.keys()):    
+        print "coding error2=%s" % (dct)
+        return None
+    return imagemodel(metadata=metadata)
 
 def VMimageListDecoder(dct):
-    requiredkeys = [u'metadata', u'images']
-    requiredkeysset = set(requiredkeys)
-    if not requiredkeysset.issubset(dct.keys()):
-        return False
-    listmetadata = dct[u'metadata']
-    requiredmetadata = [u'owner_real_name',
-        u'owner_real_name',
-        u'owner_email',
-        u'vmic_url']
-    requiredmetadataset = set(requiredmetadata)
-    if not requiredmetadataset.issubset(listmetadata.keys()):
-        return False
-    images = dct[u'images']
+    if not imagelist_required_metadata_set.issubset(dct.keys()):
+        return None    
+    if not dct.has_key(u'hv:endorser'):
+        return None
+    if not dct.has_key(u'hv:images'):
+        return None
+    endorser_dct = dct[u'hv:endorser']
+    imagelist = dct[u'hv:images']
     allimages = []
-    for image in images:
+    for image in imagelist:
         translatedimage = VMimageDecoder(image)
         if not translatedimage == None:
             allimages.append(translatedimage)
+    imagelistmetadata = {}
+    endorser = VMendorserDecoder(endorser_dct)
+    if endorser == None:
+        return None
+    for field in imagelist_required_metadata:
+        imagelistmetadata[field] = dct[field]
     # Now we generate the output
-    output = listmodel(owner_real_name=listmetadata[u'owner_real_name'],
-        owner_email=listmetadata[u'owner_email'],
-        vmic_url=listmetadata[u'vmic_url'],
-        images=allimages
+    output = listmodel(metadata = imagelistmetadata,
+        endorser = endorser,
+        images = allimages
         )
     return output
 
@@ -140,8 +175,8 @@ def file_extract_metadata(file_name):
     for line in open(file_name,'r'):
         filelength += len(line)
         m.update(line) 
-    return {u'vmi_disk_size' : filelength, 
-            u'vmi_hash_sha512' : m.hexdigest()}
+    return {u'hv:size' : filelength, 
+            u'sl:checksum:sha512' : m.hexdigest()}
 
 
 
@@ -224,18 +259,26 @@ class vmlistcontroler:
         if 0 == len(self.model.images):
             print "No images in data no point signing"
             return False
-        requiredmetadata = [u'owner_real_name',
-            u'owner_email',
-            u'vmic_url']
-        requiredmetadataset = set(requiredmetadata)
-        if not requiredmetadataset.issubset(self.model.metadata.keys()):
+        
+        if not imagelist_required_metadata_set.issubset(self.model.metadata.keys()):
             print "missing metadata"
             return False
         
-        for item in requiredmetadata:
+        for item in imagelist_required_metadata:
             value = self.model.metadata[item]
-            if value == None:
-                print "image list metadata set to null '%s'" % (item)
+            if value == None or value == "":
+                print "image list metadata set to none '%s'" % (item)
+                return False
+        for image in self.model.images:
+            for item in image_required_metadata:
+                value = image.metadata[item]
+                if value == None or value == "":
+                    print "image metadata set to none '%s'" % (item)
+                    return False
+        for item in endorser_required_metadata:
+            value = self.model.endorser.metadata[item]
+            if value == None or value == "":
+                print "endorser metadata set to none '%s'" % (item)
                 return False
         return True
         
@@ -262,21 +305,52 @@ class vmlistcontroler:
             if metadata == None:
                 print "error reading file '%s'." % (imagename)
                 sys.exit(1)
-            output_image = imagemodel(
-                vmi_hash_sha512= metadata[u'vmi_hash_sha512'],
-                vmi_disk_size=metadata[u'vmi_disk_size'])
+            output_image = imagemodel(metadata=metadata)
         else:
             output_image = imagemodel()
         f = open(filename, 'w')
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
 
 def test_things():
+    image = endorsermodel()
+    f = open("endorser", 'w')
+    json.dump(image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
+    f.close()
+    f = open("endorser", 'r')
+    json_stuff = json.load(f)
+    print 'dsadasd'
+    fred= VMendorserDecoder(json_stuff)
+    print 'dsadasd'
+    print fred.metadata
+    
+def test_things2():
+    image = imagemodel()
+    f = open("fred", 'w')
+    json.dump(image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
+    f.close()
+    f = open("fred", 'r')
+    json_stuff = json.load(f)
+    fred= VMimageDecoder(json_stuff)
+    print fred.metadata
+    print 'dsadasd'
+
+def test_things3():
+    list_mode = listmodel()
+    f = open("listmodel", 'w')
+    json.dump(list_mode, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
+    f.close()
+    f = open("listmodel", 'r')
+    json_stuff = json.load(f)
+    fred= VMimageDecoder(json_stuff)
+    print fred.metadata
+    print 'dsadasd'
+def test_things4():
     view = vmlistview()
     loadedlist = view.load_file('imagelist.json')
     
     
     avmlistOutput = json.dumps(loadedlist,cls=VMimageListEncoder)
-    print "vmimagelist=%s" % (avmlistOutput)
+    print "vmimagelist=%s" % (type(avmlistOutput))
     f = imagemodel(vmi_uid='32455374',
         vmi_url='http://www.yokel.org',
         vmi_hash_sha512='bignum',
@@ -299,7 +373,17 @@ def test_things():
     print "vmimagelist=%s" % (avmlistOutput)
     view.save_file(avmlist,'imagelist.json')
 
-
+def test_things5():
+    view = vmlistview()
+    loadedlist = view.load_file('/tmp/foo2.json')
+    print "loadedlist=%s" % (loadedlist)
+    print "loadedlist.metadata=%s" % (loadedlist.metadata)
+    print "loadedlist.endorser=%s" % (loadedlist.endorser)
+    print "loadedlist.images=%s" % (loadedlist.images)
+    
+    avmlistOutput = json.dumps(loadedlist,cls=VMimageListEncoder, sort_keys=True, indent=4)
+    print "vmimagelist=%s" % (avmlistOutput)
+    
 # User interface
 
 def pairsNnot(list_a,list_b):
@@ -417,6 +501,6 @@ def main():
         listcontroler.sign(signer_key,signer_cert,signed_output)
     if actions.__contains__('save'):
         listcontroler.save(json_output)
-    #test_things()
+    #test_things5()
 if __name__ == "__main__":
     main()
