@@ -18,6 +18,7 @@ else:
     # as working alternative to the json included.
     import simplejson as json
 
+import datetime
 
 endorser_required_metadata = [u'hv:ca',
         u'hv:dn',
@@ -91,6 +92,14 @@ class VMimageListEncoder(json.JSONEncoder):
     def vm_imagelist_encode(self, obj):    
         if not obj.metadata.has_key(u'dc:identifier'):
             obj.metadata[u'dc:identifier'] = str(uuid.uuid4())
+        if not obj.metadata.has_key(u'dc:date:created'):
+            now = datetime.datetime.utcnow()
+            obj.metadata[u'dc:date:created'] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+        if not obj.metadata.has_key(u'dc:date:expires'):
+            now = datetime.datetime.utcnow()
+            servicelength = datetime.timedelta(weeks=4)
+            expiry = now + servicelength
+            obj.metadata[u'dc:date:expires'] = expiry.strftime("%Y-%m-%dT%H:%M:%SZ")
         imagelist = []
         for i in obj.images:
             tmp_data = self.default(i)
