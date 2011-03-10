@@ -1,6 +1,6 @@
 from distutils.core import setup
 setup(name='desy-grid-vmis',
-    version='0.0.4',
+    version='0.0.5',
     description="Simple straw man signer",
     author="O M Synge",
     author_email="owen.Synge@desy.de",
