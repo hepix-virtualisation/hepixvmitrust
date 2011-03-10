@@ -50,6 +50,7 @@ imagelist_required_metadata = [u'dc:date:created',
         u'dc:title',
         u'dc:source',
         u'hv:version',
+        u'hv:uri',
     ]
 imagelist_required_metadata_set = set(imagelist_required_metadata)
 
