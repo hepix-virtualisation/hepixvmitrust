@@ -73,6 +73,244 @@ python vmilisttool.py  -t output.json  -a vm.json -j murged.json
 
 python vmilisttool.py  -t murged.json -s signed_image_list
 
+Description of meta data fields
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The metadata is in the initial versions stored in JSON. 
+
+Future versions are intended to support JSON and XML RDF
+
+The fields have a namespace like nomenclature so that translation to RDF will be easier.
+
+dc: dublin core
+sl: stratuslab
+hv: us
+
+Structure of message
+~~~~~~~~~~~~~~~~~~~~
+
+hv:imagelist
+  dc:date:created
+  dc:date:expires
+  hv:endorser
+    hv:ca
+    hv:dn_x509
+    hv:email
+    dc:creator
+  dc:identifier
+  dc:description
+  dc:title
+  hv:images
+    hv:image
+      dc:title
+      dc:description
+      hv:size
+      sl:checksum:sha512
+      sl:arch
+      hv:uri
+      dc:identifier
+      sl:os
+      sl:osversion
+      sl:comments
+      hv:hypervisor
+      hv:version
+  dc:source
+  hv:version
+  hv:uri
+
+Details of field
+~~~~~~~~~~~~~~~~
+
+
+hv:imagelist
+  comment)
+    container for metadata
+  xml example)
+    <hv:imagelist>...
+    </hv:imagelist>
+
+hv:imagelist/dc:date:created
+  comment)
+    date in format year-month-day
+  xml example)
+    <dc:date type="created">2011-03-03</dc:date>
+
+hv:imagelist/dc:date:expires
+  comment)
+    date in format year-month-day when imagelist will no longer be trusted
+  xml example)
+    <dc:date type="created">2011-03-03</dc:date>
+
+hv:imagelist/hv:endorser
+  comment)
+    container for endorser metadata
+  xml example)
+    <hv:endorser>...
+    </hv:endorser>
+
+hv:imagelist/hv:endorser/hv:ca
+  comment)
+    standard hash id for the CA, corresponds with the CA directory files.
+  xml example)
+    <hv:ca>/C=GB/ST=Greater Manchester/L=Salford/O=Comodo CA Limited/CN=AAA Certificate Services</hv:ca>
+
+hv:imagelist/hv:endorser/hv:dn_x509
+  comment)
+    x509 DN of the endorser
+  xml example)
+    <hv:dn_x509>/C=DE/O=GermanGrid/OU=DESY/CN=Owen Synge</hv:dn_x509>
+
+
+hv:imagelist/hv:endorser/hv:email
+  comment)
+    email address of the endorser
+  xml example)
+    <hv:email>owen.synge@desy.de</hv:email>
+
+hv:imagelist/hv:endorser/dc:creator
+  comment)
+    Name of the endorser
+  xml example)
+    <hv:email>Owen Synge</hv:email>
+
+hv:imagelist/dc:identifier
+  comment)
+    RFC 4122 UUID for imagelist this allows updating the list, and uniqueness.
+  xml example)
+    <dc:identifier>9ac60a74-c67f-457f-bd80-04c8ff6ecf3d</dc:identifier>
+
+hv:imagelist/dc:description
+  comment)
+    description of the image list
+  xml example)
+    <dc:description>Owens list of images from DESY quattor.</dc:description>
+
+hv:imagelist/dc:title
+  comment)
+    title of image list
+  xml example)
+    <dc:description>DISH service</dc:description>
+
+
+hv:imagelist/hv:images
+  comment)
+    Container of the list of images
+  xml example)
+    <hv:images>....
+    </hv:images>
+
+hv:imagelist/hv:images/hv:image
+  comment)
+    Container of the image
+  xml example)
+    <hv:image>....
+    </hv:image>
+
+hv:imagelist/hv:images/hv:image/dc:title
+  comment)
+    Title of image
+  xml example)
+    <dc:title>generic:sl5</dc:title>
+
+hv:imagelist/hv:images/hv:image/dc:title
+  comment)
+    Name of the image
+  xml example)
+    <dc:title>generic:sl5</dc:title>
+
+hv:imagelist/hv:images/hv:image/dc:description
+  comment)
+    Free text describing the image
+  xml example)
+    <dc:description>Desy generated generic sl5 image</dc:description>
+
+
+hv:imagelist/hv:images/hv:image/hv:size
+  comment)
+    size of the image in bytes
+  xml example)
+    <hv:size>4619442176</hv:size>
+
+hv:imagelist/hv:images/hv:image/sl:checksum:sha512
+  comment)
+    size of the image in bytes
+  xml example)
+    <sl:checksum type="sha512">8b4c269a60da1061b434b696c4a89293bea847b66bd8ba486a914d4209df651193ee8d454f8231840b7500fab6740620c7111d9a17d08b743133dc393ba2c0d4</sl:checksum>
+
+hv:imagelist/hv:images/hv:image/sl:arch
+  comment)
+    architecture of the image typically 'i386' or 'amd64'
+  xml example)
+    <sl:arch>amd64</sl:checksum>
+
+
+hv:imagelist/hv:images/hv:image/hv:uri
+  comment)
+    URI pointing to the latest version of this file.
+  xml example)
+    <hv:uri>https://example.org/imagelist.xml</hv:uri>
+
+hv:imagelist/hv:images/hv:image/dc:identifier
+  comment)
+    RFC 4122 UUID for image this allows updating the image, and uniqueness.
+  xml example)
+    <hv:uri>185c9f57-f838-4ac6-8246-85ccd6d6d3f4</hv:uri>
+
+hv:imagelist/hv:images/hv:image/sl:os
+  comment)
+    The operating system the image runs, examples include "Linux" "BSD" "FreeBSD"
+  xml example)
+    <sl:os>Linux</sl:os>
+
+
+hv:imagelist/hv:images/hv:image/sl:osversion
+  comment)
+    The operating system version the image runs, examples include "SL_6.0", maybe this
+    tag should be further broken downs so easier to process for computers.
+  xml example)
+    <sl:osversion>SL_5.5</sl:osversion>
+
+hv:imagelist/hv:images/hv:image/sl:comments
+  comment)
+    Stratus lab suggest comments on how the image is to be deployed.
+  xml example)
+    <sl:comments></sl:comments>
+
+
+hv:imagelist/hv:images/hv:image/hv:hypervisor
+  comment)
+    Typically set to reflect the Virtualization technology values such as "xen", "kvm".
+  xml example)
+    <hv:hypervisor></hv:hypervisor>
+
+hv:imagelist/hv:images/hv:image/hv:version
+  comment)
+    The version of the image, so that updates can share the same metadata
+    (with exception of dc:identifier) in case of update. Typically a numeric value.
+  xml example)
+    <hv:version></hv:version>
+
+
+hv:imagelist/dc:source
+  comment)
+    The URI where the latest version of this file can be found.
+  xml example)
+    <dc:source type="uri">http://example.org/example.img.gz</dc:source>
+
+hv:imagelist/hv:version
+  comment)
+    The version of the imagelist, so that updates can share the same metadata
+    (with exception of dc:identifier) in case of update. Typically a numeric value.
+  xml example)
+    <hv:version></hv:version>
+
+hv:imagelist/hv:uri
+  comment)
+    The uri to retrive new versions of the imagelist, that updates can be handled.
+  xml example)
+    <hv:uri></hv:uri>
+
+
 Example metadata files
 ~~~~~~~~~~~~~~~~~~~~~~
 
