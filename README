@@ -448,3 +448,17 @@ sUOInHRhksokh2ow68KZK4vXLI173v5yZE7FZZ1Gl9T+YpkmOIW4iQ==
 
 ------EAE3006C97F670EE450F46AC8DF4C070--
 
+
+How to verify.
+~~~~~~~~~~~~~~
+
+To get the DN and CA of your signature.
+
+openssl smime -in your_signed.msg \
+ -pk7out | openssl pkcs7 -print_certs
+
+To Verfy the message agaisnt the CA certificate.
+
+openssl smime -in your_signed.msg \
+ -CAfile /etc/grid-security/certificates/dd4b34ea.0 \
+ -verify 1> /dev/null 
