@@ -474,7 +474,8 @@ def main():
         generate_list = options.generate
         actions.add('generate')
     if options.format:
-        print "Currently only supports JSON output RDF XML output may come later"
+        format = options.format
+        actions.add('format')
     if options.image:
         imagelist = options.image
         actions.add('generate')
@@ -511,6 +512,15 @@ def main():
         listcontroler.sign(signer_key,signer_cert,signed_output)
     if actions.__contains__('save'):
         listcontroler.save(json_output)
+    if actions.__contains__('format'):
+        if format == 'xml':
+            # do nothing right now
+            1
+        else:
+            print "Output format type '" + format + "' not supported right now."
+            print "Currently only supports JSON output RDF XML output may come later"
+            sys.exit(1)
+    #test_things5()
     #test_things5()
 if __name__ == "__main__":
     main()
