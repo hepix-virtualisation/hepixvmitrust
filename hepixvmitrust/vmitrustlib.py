@@ -55,18 +55,18 @@ imagelist_required_metadata = [u'dc:date:created',
 imagelist_required_metadata_set = set(imagelist_required_metadata)
 
 
-class endorsermodel:
+class EndorserModel:
     def __init__(self,metadata = {}):
         self.metadata = metadata
 
 
-class imagemodel:    
+class ImageModel:    
     def __init__(self,metadata = {}):
         self.metadata = metadata
 
-class listmodel:
+class ListModel:
     interestingkeys = set([u'vmi_uid'])
-    def __init__(self,metadata = {},images=[],endorser=endorsermodel()):
+    def __init__(self,metadata = {},images=[],endorser=EndorserModel()):
         self.endorser = endorser
         self.metadata = metadata
         self.images = images
@@ -74,11 +74,11 @@ class listmodel:
         
 class VMimageListEncoder(json.JSONEncoder):
     def default(self, obj):
-        if isinstance(obj, endorsermodel):
+        if isinstance(obj, EndorserModel):
             return self.vm_endorser_encode(obj)
-        if isinstance(obj, imagemodel):
+        if isinstance(obj, ImageModel):
             return self.vm_image_encode(obj)
-        if isinstance(obj, listmodel):
+        if isinstance(obj, ListModel):
             return self.vm_imagelist_encode(obj)            
         return json.JSONEncoder.default(obj)
 
@@ -134,7 +134,7 @@ def VMendorserDecoder(dct):
         print "coding error2=%s" % (dct)
         return None
     #print "VMendorserDecoder.metadata=%s" % (metadata)
-    return endorsermodel(metadata=metadata)
+    return EndorserModel(metadata=metadata)
 
 def VMimageDecoder(dct):
     if not u'hv:image' in dct.keys():
@@ -146,7 +146,7 @@ def VMimageDecoder(dct):
     if not image_required_metadata_set.issubset(metadata.keys()):    
         print "coding error2=%s" % (dct)
         return None
-    return imagemodel(metadata=metadata)
+    return ImageModel(metadata=metadata)
 
 def VMimageListDecoder(dct):
     if not imagelist_required_metadata_set.issubset(dct.keys()):
@@ -169,7 +169,7 @@ def VMimageListDecoder(dct):
     for field in imagelist_required_metadata:
         imagelistmetadata[field] = dct[field]
     # Now we generate the output
-    output = listmodel(metadata = imagelistmetadata,
+    output = ListModel(metadata = imagelistmetadata,
         endorser = endorser,
         images = allimages
         )
@@ -190,7 +190,7 @@ def file_extract_metadata(file_name):
 
 
 
-class vmlistview:
+class VMListView:
     def load_file(self,filename):
         loadedfile = None
         fp = open(filename, 'r')
@@ -218,10 +218,10 @@ class vmlistview:
 
 
 
-class vmlistcontroler:
+class VMListControler:
     def __init__(self):
-        self.view = vmlistview()
-        self.model = listmodel()
+        self.view = VMListView()
+        self.model = ListModel()
     def load(self,filename):
         try:
             candidate = self.view.load_file(filename)
@@ -315,212 +315,9 @@ class vmlistcontroler:
             if metadata == None:
                 print "error reading file '%s'." % (imagename)
                 sys.exit(1)
-            output_image = imagemodel(metadata=metadata)
+            output_image = ImageModel(metadata=metadata)
         else:
-            output_image = imagemodel()
+            output_image = ImageModel()
         f = open(filename, 'w')
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
 
-def test_things():
-    image = endorsermodel()
-    f = open("endorser", 'w')
-    json.dump(image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
-    f.close()
-    f = open("endorser", 'r')
-    json_stuff = json.load(f)
-    print 'dsadasd'
-    fred= VMendorserDecoder(json_stuff)
-    print 'dsadasd'
-    print fred.metadata
-    
-def test_things2():
-    image = imagemodel()
-    f = open("fred", 'w')
-    json.dump(image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
-    f.close()
-    f = open("fred", 'r')
-    json_stuff = json.load(f)
-    fred= VMimageDecoder(json_stuff)
-    print fred.metadata
-    print 'dsadasd'
-
-def test_things3():
-    list_mode = listmodel()
-    f = open("listmodel", 'w')
-    json.dump(list_mode, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
-    f.close()
-    f = open("listmodel", 'r')
-    json_stuff = json.load(f)
-    fred= VMimageDecoder(json_stuff)
-    print fred.metadata
-    print 'dsadasd'
-def test_things4():
-    view = vmlistview()
-    loadedlist = view.load_file('imagelist.json')
-    
-    
-    avmlistOutput = json.dumps(loadedlist,cls=VMimageListEncoder)
-    print "vmimagelist=%s" % (type(avmlistOutput))
-    f = imagemodel(vmi_uid='32455374',
-        vmi_url='http://www.yokel.org',
-        vmi_hash_sha512='bignum',
-        vmi_hypervisor='kvm',
-        vmi_description='easy to run vm',
-        vmi_os_version='sl6.0201101',
-        vmi_os_architecture='i386',
-        vmi_disk_size='20e12bytes')
-    imageoutput = json.dumps(f,cls=VMimageListEncoder)
-    print "xdx%s" % (imageoutput)
-    fred = json.loads(imageoutput,object_hook=VMimageDecoder)
-    imageoutput = json.dumps(f,cls=VMimageListEncoder)
-    print "xdx%s" % (imageoutput)
-    avmlist = listmodel(owner_real_name="Owen Synge",
-        owner_email='owen.synge@yokel.org',
-        vmi_url='www.yokel.org',
-        vmic_url='www.yokel.org',
-        images=[f])
-    avmlistOutput = json.dumps(avmlist,cls=VMimageListEncoder)
-    print "vmimagelist=%s" % (avmlistOutput)
-    view.save_file(avmlist,'imagelist.json')
-
-def test_things5():
-    view = vmlistview()
-    loadedlist = view.load_file('/tmp/foo2.json')
-    print "loadedlist=%s" % (loadedlist)
-    print "loadedlist.metadata=%s" % (loadedlist.metadata)
-    print "loadedlist.endorser=%s" % (loadedlist.endorser)
-    print "loadedlist.images=%s" % (loadedlist.images)
-    
-    avmlistOutput = json.dumps(loadedlist,cls=VMimageListEncoder, sort_keys=True, indent=4)
-    print "vmimagelist=%s" % (avmlistOutput)
-    
-# User interface
-
-def pairsNnot(list_a,list_b):
-    len_generate_list = len(list_a)
-    len_image_list = len(list_b)
-    ocupies_generate_list = set(range(len_generate_list))
-    ocupies_image_list = set(range(len_image_list))
-    ocupies_pairs = ocupies_image_list.intersection(ocupies_generate_list)
-    diff_a = ocupies_generate_list.difference(ocupies_image_list)
-    diff_b = ocupies_image_list.difference(ocupies_generate_list)
-    arepairs = []
-    for i in ocupies_pairs:
-        arepairs.append([list_a[i],list_b[i]])
-    notpairs_a = []
-    for i in diff_a:
-        notpairs_a.append(list_a[i])
-    notpairs_b = []
-    for i in diff_b:
-        notpairs_b.append(list_b[i])
-    
-    return arepairs,notpairs_a,notpairs_b
-
-
-
-def main():
-    """Runs program and handles command line options"""
-    actions = set([])
-    listcontroler = vmlistcontroler()
-    p = optparse.OptionParser()
-    p.add_option('-j', '--json', action ='store', help='Path of the json output file')
-    p.add_option('-t', '--template', action ='store', help='Path of the json template file')
-    p.add_option('-a', '--add', action ='append', help='adds a VM image to the JSON')
-    p.add_option('-d', '--delete', action ='append', help='del a VM image to the JSON')
-    p.add_option('-g', '--generate', action ='append', help='generates a VM image metadata for image')
-    p.add_option('-i', '--image', action ='append', help='Sets the image to generates a VM image metadata')
-    p.add_option('-l', '--list', action ='store_true', help='lists VM images in the JSON')
-    p.add_option('-k', '--signer_key', action ='store', help='path to signer key')
-    p.add_option('-c', '--signer_certificate', action ='store', help='path to signer certificate')
-    p.add_option('-s', '--sign', action ='store', help='returns verbose output')
-    p.add_option('-f', '--format', action ='store', help='Set the format valid values are JSON and XML')
-    
-    options, arguments = p.parse_args()
-    template = 'imagelist.json'
-    json_output = 'imagelist.json'
-    generate_list = []
-    add_image_file = []
-    del_image_metadata = []
-    format = None
-    signer_key = os.environ['HOME'] + '/.globus/userkey.pem'
-    signer_cert = os.environ['HOME'] + '/.globus/usercert.pem'
-    signed_output = None
-    list_images = False
-    imagelist = []
-    if options.template:
-        template = options.template
-        actions.add('load_template')
-    if options.json:
-        json_output = options.json
-        actions.add('save')
-    if options.add:
-        add_image_file = options.add
-        actions.add('image_add')
-    if options.delete:
-        del_image_file = options.delete
-        actions.add('image_del')
-    if options.list:
-        list_images = True
-        actions.add('image_list')
-    if options.signer_key:
-        signer_key = options.signer_key
-    if options.signer_certificate:
-        signer_cert = options.signer_certificate
-    if options.sign:
-        actions.add('verify')
-        actions.add('sign')
-        signed_output = options.sign
-    if options.generate:
-        generate_list = options.generate
-        actions.add('generate')
-    if options.format:
-        format = options.format
-        actions.add('format')
-    if options.image:
-        imagelist = options.image
-        actions.add('generate')
-        
-    # Now process the actions.
-    
-    if actions.__contains__('generate'):
-        pairs, extra_gens ,extra_images = pairsNnot(generate_list,imagelist)
-        if len(extra_images) > 0:
-            print "error images and no target"
-        for paired_items in pairs:    
-            listcontroler.generate(paired_items[0],paired_items[1])
-        for gen_it in extra_gens:
-            listcontroler.generate(gen_it)
-    if actions.__contains__('load_template'):
-        listcontroler.load(template)
-    if actions.__contains__('image_add'):
-        for item in add_image_file:
-            listcontroler.image_add(item)
-    if actions.__contains__('image_del'):
-        for item in del_image_file:
-            success = listcontroler.image_del(item)
-            if success == False:
-                print "Failed to delete image '%s'" % (item)
-                sys.exit(1)
-    if actions.__contains__('image_list'):
-        listcontroler.images_list()
-    if actions.__contains__('verify'):
-        success = listcontroler.verify()
-        if success == False:
-            print "Failed to verify valid meta data for image."
-            sys.exit(1)
-    if actions.__contains__('sign'):
-        listcontroler.sign(signer_key,signer_cert,signed_output)
-    if actions.__contains__('save'):
-        listcontroler.save(json_output)
-    if actions.__contains__('format'):
-        if format == 'xml':
-            # do nothing right now
-            1
-        else:
-            print "Output format type '" + format + "' not supported right now."
-            print "Currently only supports JSON output RDF XML output may come later"
-            sys.exit(1)
-    #test_things5()
-    #test_things5()
-if __name__ == "__main__":
-    main()
