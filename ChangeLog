@@ -1,3 +1,22 @@
+2011-03-31 17:55 Ian Gable <igable@uvic.ca>
+
+	* vmilistool.py: renamed to vmilisttool, and had the reusable
+	  classes pushed into the new python module hepixvmtrust
+
+	* setup.py: tweak name of the excutable, add PyPI classifiers,
+	  import the version number from __version__
+
+	* hepixvmitrust/vmitrustlib.py: new python module containing the classes
+	  that were in vmilisttool.py
+
+	* hepixvmitrust/__init__.py: load the VMTrustControler object
+	  automatically
+
+	* hepixvmitrust/__version__.py: stardard file to store the module
+	  version number
+
+	* testing.py: new file with testing functions pulled from vmilisttool
+
 2011-03-07 18:03  omsynge
 
 	* setup.py: make the script vmilisttool.py executable
