@@ -19,6 +19,11 @@ else:
     import simplejson as json
 
 import datetime
+import time
+time_required_metadata = [u'dc:date:created', 
+        u'dc:date:expires',
+    ]
+time_required_metadata_set = set(time_required_metadata)
 
 endorser_required_metadata = [u'hv:ca',
         u'hv:dn',
@@ -54,6 +59,13 @@ imagelist_required_metadata = [u'dc:date:created',
     ]
 imagelist_required_metadata_set = set(imagelist_required_metadata)
 
+imagelist_required_metadata_types = [u'hv:endorser',
+        u'hv:images',
+    ]
+imagelist_required_metadata_types_set = set(imagelist_required_metadata_types)
+
+
+time_format_definition = "%Y-%m-%dT%H:%M:%SZ"
 
 class EndorserModel:
     def __init__(self,metadata = {}):
@@ -79,7 +91,9 @@ class VMimageListEncoder(json.JSONEncoder):
         if isinstance(obj, ImageModel):
             return self.vm_image_encode(obj)
         if isinstance(obj, ListModel):
-            return self.vm_imagelist_encode(obj)            
+            return self.vm_imagelist_encode(obj)
+        if isinstance(obj, datetime.datetime):
+            return self.datetime_encode(obj)
         return json.JSONEncoder.default(obj)
 
     def vm_image_encode(self, obj):
@@ -95,12 +109,12 @@ class VMimageListEncoder(json.JSONEncoder):
             obj.metadata[u'dc:identifier'] = str(uuid.uuid4())
         if not obj.metadata.has_key(u'dc:date:created'):
             now = datetime.datetime.utcnow()
-            obj.metadata[u'dc:date:created'] = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+            obj.metadata[u'dc:date:created'] = now
         if not obj.metadata.has_key(u'dc:date:expires'):
             now = datetime.datetime.utcnow()
             servicelength = datetime.timedelta(weeks=4)
             expiry = now + servicelength
-            obj.metadata[u'dc:date:expires'] = expiry.strftime("%Y-%m-%dT%H:%M:%SZ")
+            obj.metadata[u'dc:date:expires'] = expiry
         imagelist = []
         for i in obj.images:
             tmp_data = self.default(i)
@@ -122,6 +136,8 @@ class VMimageListEncoder(json.JSONEncoder):
             if not obj.metadata.has_key(field):
                 obj.metadata[field] = ''
         return {u'hv:x509' : obj.metadata}
+    def datetime_encode(self, obj):
+        return obj.strftime(time_format_definition)
 
 def VMendorserDecoder(dct):
     if not u'hv:x509' in dct.keys():
@@ -149,8 +165,11 @@ def VMimageDecoder(dct):
     return ImageModel(metadata=metadata)
 
 def VMimageListDecoder(dct):
-    if not imagelist_required_metadata_set.issubset(dct.keys()):
-        return None    
+    dict_keys = set(dct.keys())
+    if not imagelist_required_metadata_set.issubset(dict_keys):
+        return None
+    if not time_required_metadata_set.issubset(dict_keys):
+        return None
     if not dct.has_key(u'hv:endorser'):
         return None
     if not dct.has_key(u'hv:images'):
@@ -166,8 +185,13 @@ def VMimageListDecoder(dct):
     endorser = VMendorserDecoder(endorser_dct)
     if endorser == None:
         return None
-    for field in imagelist_required_metadata:
+    
+    copyfield = dict_keys.difference(time_required_metadata + imagelist_required_metadata_types)
+    for field in copyfield:
         imagelistmetadata[field] = dct[field]
+    for field in time_required_metadata:
+        stringform = dct[field]
+        imagelistmetadata[field] = datetime.datetime(*(time.strptime(stringform, time_format_definition)[0:7]))
     # Now we generate the output
     output = ListModel(metadata = imagelistmetadata,
         endorser = endorser,
