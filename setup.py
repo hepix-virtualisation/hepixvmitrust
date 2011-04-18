@@ -29,5 +29,5 @@ setup(name='hepixvmitrust',
         ],
     
     scripts=['vmilisttool'],
-    data_files=[('/usr/share/doc/vmilisttool',['README','ChangeLog','imagelist.json'])]
+    data_files=[('/usr/share/doc/vmilisttool',['README.md','ChangeLog','imagelist.json'])]
     )
