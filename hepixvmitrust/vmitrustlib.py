@@ -290,6 +290,8 @@ class VMListControler:
         return True
         
     def verify(self):
+        ### This function verifies the values of the metadata 
+        ### 
         if 0 == len(self.model.images):
             print "No images in data no point signing"
             return False
@@ -297,7 +299,6 @@ class VMListControler:
         if not imagelist_required_metadata_set.issubset(self.model.metadata.keys()):
             print "missing metadata"
             return False
-        
         for item in imagelist_required_metadata:
             value = self.model.metadata[item]
             if value == None or value == "":
@@ -318,7 +319,6 @@ class VMListControler:
         
     def sign(self,signer_key,signer_cert,outfile):
         content = self.view.dumps(self.model)
-        
         self.SMIME = SMIME.SMIME()
         self.SMIME.load_key(signer_key,signer_cert)
         buf = BIO.MemoryBuffer(content)        
@@ -329,7 +329,8 @@ class VMListControler:
         self.message_signed = str(out.read())
         f = open(outfile, 'w')
         f.write(self.message_signed )
-        # Save the PRNG's state.
+        return True
+
     def generate(self,filename,imagepath=None):
         output_image = None
 
@@ -338,10 +339,10 @@ class VMListControler:
             metadata = file_extract_metadata(imagepath)
             if metadata == None:
                 print "error reading file '%s'." % (imagename)
-                sys.exit(1)
+                return False
             output_image = ImageModel(metadata=metadata)
         else:
             output_image = ImageModel()
         f = open(filename, 'w')
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
-
+        return True

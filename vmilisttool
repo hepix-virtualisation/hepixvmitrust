@@ -122,7 +122,10 @@ def main():
         for paired_items in pairs:    
             listcontroler.generate(paired_items[0],paired_items[1])
         for gen_it in extra_gens:
-            listcontroler.generate(gen_it)
+            rc = listcontroler.generate(gen_it)
+            if not rc:
+                print "Files '%s'" % (gen_it)
+                sys.exit(1)
     if actions.__contains__('load_template'):
         listcontroler.load(template)
     if actions.__contains__('image_add'):
