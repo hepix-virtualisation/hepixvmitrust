@@ -292,10 +292,6 @@ class VMListControler:
     def verify(self):
         ### This function verifies the values of the metadata 
         ### 
-        if 0 == len(self.model.images):
-            print "No images in data no point signing"
-            return False
-        
         if not imagelist_required_metadata_set.issubset(self.model.metadata.keys()):
             print "missing metadata"
             return False
