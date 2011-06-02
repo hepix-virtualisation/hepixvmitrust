@@ -407,5 +407,6 @@ class VMListControler:
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
         return True
     def generates(self,filename,imagepath=None,metadata=None):
+        pass
     def dumps(self):
         return self.view.dumps(self.model)
