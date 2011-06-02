@@ -7,9 +7,8 @@ import sys
 import hashlib
 import os.path
 # needed for the signing of images.
-import M2Crypto.SMIME 
-import M2Crypto.BIO 
 import M2Crypto.SMIME
+import M2Crypto.BIO
 import uuid
 # simplejson is included with Python 2.6 and above
 # with the name json
@@ -89,7 +88,6 @@ class ImageModel:
         self.metadata = metadata
 
 class ListModel:
-    interestingkeys = set([u'vmi_uid'])
     def __init__(self,metadata = {},images=[],endorser=EndorserModel()):
         self.endorser = endorser
         self.metadata = metadata
@@ -243,15 +241,35 @@ def file_extract_metadata(file_name):
 class VMListView:
     def __init__(self):
         self.logger = logging.getLogger("hepixvmitrust.vmitrustlib.VMListView")
-        
+        self.indent =4
+        self.sort_keys = True
     def load_file(self,filename):
+        self.logger.warn("Using depricated function 'load_file'")
         loadedfile = None
         fp = open(filename, 'r')
-        loadedfile = json.load(fp)
+        json_string = fp.read()
+        return self.loads(json_string)
+        
+    def save_file(self,entry,filename):
+        f = open(filename, 'w')
+        json.dump(entry, f, cls=VMimageListEncoder, sort_keys=self.sort_keys, indent=self.indent)
+        return True
+        
+    def images_list(self,entry):
+        for item in entry.images:
+            if u'dc:identifier' in item.metadata.keys():
+                print item.metadata[u'dc:identifier']
+                
+    def dumps(self,entry):
+        return json.dumps(entry, cls=VMimageListEncoder, sort_keys=self.sort_keys, indent=self.indent)
+
+    def loads(self,json_string):
+        loadedfile = json.loads(json_string)
         decoded_image = VMimageListDecoderHeader(loadedfile)
         if decoded_image != None:
             return decoded_image
         else:
+            # Hack to get arround imafe format change
             decoded_image = VMimageListDecoder(loadedfile)
             if decoded_image != None:
                 self.logger.warning("Parsing depricated hepiximagelist format.")
@@ -260,40 +278,44 @@ class VMListView:
                 self.logger.warning("This code must be removed soon.")
         self.logger.error("Failed to parse hepiximagelist format.")
         return decoded_image
-        
-    def save_file(self,entry,filename):
-        f = open(filename, 'w')
-        json.dump(entry, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
-        return True
-    def images_list(self,entry):
-        #print "frod=%s" % (entry)
-        for item in entry.images:
-            print item.metadata[u'vmi_uid']
-    def images_list(self,entry):
-        #print "frod=%s" % (entry)
-        for item in entry.images:
-            print item.metadata[u'vmi_uid']
-    def dumps(self,entry):
-        return json.dumps(entry, cls=VMimageListEncoder, sort_keys=True, indent=4)
 
 
 
 class VMListControler:
     def __init__(self):
-        self.logger = logging.getLogger("hepixvmitrust.vmitrustlib.VMListControler")
-        
+        self.logger = logging.getLogger("hepixvmitrust.vmitrustlib.VMListControler")        
         self.view = VMListView()
         self.model = ListModel()
-    def load(self,filename):
+
+    def loaddep(self,filename):
+        '''Please use loads
+            This function is depricated as its names not clear 
+            what it does and its mixed function.
+        '''
+        self.logger.warn("Using depricated function 'loaddep'")
+        f = open(filename, 'r')
+        encoding_string = f.read()
+        self.loads(encoding_string)
+        
+    def loads_smime(self,smime_string):
+        buf = M2Crypto.BIO.MemoryBuffer(str(smime_string))
         try:
-            candidate = self.view.load_file(filename)
+            p7, data = M2Crypto.SMIME.smime_load_pkcs7_bio(buf)
+        except AttributeError, e:
+            raise e
+        self.loads(data.read())
+        
+    def loads(self,encoding_string):
+        try:
+            candidate = self.view.loads(str(encoding_string))
         except ValueError:
+            self.logger.error("Failed to parse JSON.")
             return False
-        if candidate == False:
+        if candidate == None:
             return False
         self.model = candidate
         return True
-        
+            
     def save(self,filename):
         self.view.save_file(self.model,filename)
         
@@ -319,7 +341,7 @@ class VMListControler:
         todelete = []
         for i in range(len(self.model.images)):
             item = self.model.images[i]
-            if item.metadata[u'vmi_uid'] == matchuuid:
+            if item.metadata[u'dc:identifier'] == matchuuid:
                 todelete.insert(0, i)
         if len(todelete) == 0:
             return False
@@ -354,7 +376,9 @@ class VMListControler:
         return True
         
     def sign(self,signer_key,signer_cert,outfile):
-        content = self.view.dumps(self.model)
+        self.logger.warn("Using depricated function 'sign'")
+        self.logger.debug("please dumps and use cryptography in an seperate area.")
+        content = self.dumps()
         smime = M2Crypto.SMIME.SMIME()
         smime.load_key(signer_key,signer_cert)
         buf = M2Crypto.BIO.MemoryBuffer(content)        
@@ -382,3 +406,6 @@ class VMListControler:
         f = open(filename, 'w')
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
         return True
+    def generates(self,filename,imagepath=None,metadata=None):
+    def dumps(self):
+        return self.view.dumps(self.model)
