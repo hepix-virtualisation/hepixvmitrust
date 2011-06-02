@@ -87,6 +87,7 @@ class ImageModel:
     def __init__(self,metadata = {}):
         self.metadata = metadata
 
+        
 class ListModel:
     def __init__(self,metadata = {},images=[],endorser=EndorserModel()):
         self.endorser = endorser
@@ -236,7 +237,19 @@ def file_extract_metadata(file_name):
     return {u'hv:size' : filelength, 
             u'sl:checksum:sha512' : m.hexdigest()}
 
+def applydefaults(FirstParty,Secondparty,overwrite = False):
+    if not isinstance (ImageModel):
+        return False
 
+    localmetadatakeys = set(FirstParty.metadata.keys())
+    seondpartymetadatakeys = set(FirstParty.metadata.keys())
+
+    ocupies_pairs = localmetadatakeys.intersection(seondpartymetadatakeys)
+    diff_a = seondpartymetadatakeys.difference(localmetadatakeys)
+    diff_b = localmetadatakeys.difference(seondpartymetadatakeys)
+    print ocupies_pairs
+    print diff_a
+    print diff_b
 
 class VMListView:
     def __init__(self):
@@ -418,7 +431,8 @@ class VMListControler:
             output_image = ImageModel()
         if output_image == None:
             self.logger.warning("output_image='%s'" %(output_image))
-            
+        else:
+            applydefaults (output_image,imagepath)
         f = open(filename, 'w')
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
         return True
