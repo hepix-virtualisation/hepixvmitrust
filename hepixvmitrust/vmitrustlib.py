@@ -22,6 +22,16 @@ else:
 
 import datetime
 import time
+import logging, logging.config
+
+# Set up teh logging library
+class NullHandler(logging.Handler):
+    def emit(self, record):
+        pass
+
+h = NullHandler()
+logging.getLogger("hepixvmitrust.vmitrustlib").addHandler(h)
+logger = logging.getLogger("hepixvmitrust.vmitrustlib")
 time_required_metadata = [u'dc:date:created', 
         u'dc:date:expires',
     ]
@@ -131,7 +141,7 @@ class VMimageListEncoder(json.JSONEncoder):
             u'hv:endorser' : self.default(obj.endorser)}
         for key in obj.metadata.keys():
             output[key] = obj.metadata[key]
-        return output
+        return {u'hv:imagelist' : output}
     
     def vm_endorser_encode(self, obj):
         for field in endorser_required_metadata:
@@ -146,10 +156,11 @@ def VMendorserDecoder(dct):
         return None
     metadata = dct[u'hv:x509']
     if metadata == None:
-        print "coding error=%s" % (dct)
+        
+        logger.error( "coding error=%s" % (dct))
         return None
     if not endorser_required_metadata_set.issubset(metadata.keys()):    
-        print "coding error2=%s" % (dct)
+        logger.error( "coding error2=%s" % (dct))
         return None
     #print "VMendorserDecoder.metadata=%s" % (metadata)
     return EndorserModel(metadata=metadata)
@@ -159,25 +170,30 @@ def VMimageDecoder(dct):
         return None
     metadata = dct[u'hv:image']
     if metadata == None:
-        print "coding error=%s" % (dct)
+        logger.error("coding error=%s" % (dct))
         return None
     if not image_required_metadata_set.issubset(metadata.keys()):    
-        print "coding error2=%s" % (dct)
+        logger.error("coding error2=%s" % (dct))
         return None
     return ImageModel(metadata=metadata)
 
-def VMimageListDecoder(dct):
-    dict_keys = set(dct.keys())
+
+
+
+def VMimageListDecoder(dictionary):
+    if not isinstance(dictionary, dict):
+        return None
+    dict_keys = set(dictionary.keys())
     if not imagelist_required_metadata_set.issubset(dict_keys):
         return None
     if not time_required_metadata_set.issubset(dict_keys):
         return None
-    if not dct.has_key(u'hv:endorser'):
+    if not dictionary.has_key(u'hv:endorser'):
         return None
-    if not dct.has_key(u'hv:images'):
+    if not dictionary.has_key(u'hv:images'):
         return None
-    endorser_dct = dct[u'hv:endorser']
-    imagelist = dct[u'hv:images']
+    endorser_dct = dictionary[u'hv:endorser']
+    imagelist = dictionary[u'hv:images']
     allimages = []
     for image in imagelist:
         translatedimage = VMimageDecoder(image)
@@ -187,12 +203,11 @@ def VMimageListDecoder(dct):
     endorser = VMendorserDecoder(endorser_dct)
     if endorser == None:
         return None
-    
     copyfield = dict_keys.difference(time_required_metadata + imagelist_required_metadata_types)
     for field in copyfield:
-        imagelistmetadata[field] = dct[field]
+        imagelistmetadata[field] = dictionary[field]
     for field in time_required_metadata:
-        stringform = dct[field]
+        stringform = dictionary[field]
         imagelistmetadata[field] = datetime.datetime(*(time.strptime(stringform, time_format_definition)[0:7]))
     # Now we generate the output
     output = ListModel(metadata = imagelistmetadata,
@@ -201,6 +216,15 @@ def VMimageListDecoder(dct):
         )
     return output
 
+
+def VMimageListDecoderHeader(dct):
+    if not u'hv:imagelist' in dct.keys():
+        return None
+    dictionary = dct[u'hv:imagelist']
+    if not isinstance(dictionary, dict):
+        return None
+    return VMimageListDecoder(dictionary)
+    
 def file_extract_metadata(file_name):
     if file_name == None:
         return
@@ -217,14 +241,24 @@ def file_extract_metadata(file_name):
 
 
 class VMListView:
+    def __init__(self):
+        self.logger = logging.getLogger("hepixvmitrust.vmitrustlib.VMListView")
+        
     def load_file(self,filename):
         loadedfile = None
         fp = open(filename, 'r')
-
         loadedfile = json.load(fp)
-        decoded_image = VMimageListDecoder(loadedfile)
-        if decoded_image == False:
-            return False
+        decoded_image = VMimageListDecoderHeader(loadedfile)
+        if decoded_image != None:
+            return decoded_image
+        else:
+            decoded_image = VMimageListDecoder(loadedfile)
+            if decoded_image != None:
+                self.logger.warning("Parsing depricated hepiximagelist format.")
+                return decoded_image
+            else:
+                self.logger.warning("This code must be removed soon.")
+        self.logger.error("Failed to parse hepiximagelist format.")
         return decoded_image
         
     def save_file(self,entry,filename):
@@ -246,6 +280,8 @@ class VMListView:
 
 class VMListControler:
     def __init__(self):
+        self.logger = logging.getLogger("hepixvmitrust.vmitrustlib.VMListControler")
+        
         self.view = VMListView()
         self.model = ListModel()
     def load(self,filename):
@@ -294,24 +330,26 @@ class VMListControler:
     def verify(self):
         ### This function verifies the values of the metadata 
         ### 
+        if self.model == None:
+            return False
         if not imagelist_required_metadata_set.issubset(self.model.metadata.keys()):
-            print "missing metadata"
+            self.logger.error("missing metadata =%s" % ( self.model.metadata.keys()))
             return False
         for item in imagelist_required_metadata:
             value = self.model.metadata[item]
             if value == None or value == "":
-                print "image list metadata set to none '%s'" % (item)
+                self.logger.error("image list metadata set to none '%s'" % (item))
                 return False
         for image in self.model.images:
             for item in image_required_metadata:
                 value = image.metadata[item]
                 if value == None or value == "":
-                    print "image metadata set to none '%s'" % (item)
+                    self.logger.error("image metadata set to none '%s'" % (item))
                     return False
         for item in endorser_required_metadata:
             value = self.model.endorser.metadata[item]
             if value == None or value == "":
-                print "endorser metadata set to none '%s'" % (item)
+                self.logger.error("endorser metadata set to none '%s'" % (item))
                 return False
         return True
         
@@ -336,7 +374,7 @@ class VMListControler:
 
             metadata = file_extract_metadata(imagepath)
             if metadata == None:
-                print "error reading file '%s'." % (imagename)
+                self.logger.error("reading file '%s'." % (imagename))
                 return False
             output_image = ImageModel(metadata=metadata)
         else:
