@@ -3,10 +3,13 @@
 Introduction
 ---------------------------------------
 
-hepixvmitrust is a package that contains a library and a CLI tool for
-signing lists of virtual machine image metadata. The tools are generally
-reusable but were developed to satisfy the need to securely exchange virtual
-machine images between High Energy Physics sites.
+hepixvmitrust is a package that contains a CLI tool, and a minimal 
+implementation, in its documentation for X509 signing lists of 
+virtual machine image metadata. The tools are generally reusable 
+but were developed to satisfy the need to securely exchange virtual 
+machine images between High Energy Physics sites, in a similar way 
+to yum and apt repositories provide for rpms, this software provides 
+for Virtual Maschines.
 
 
 Installation on Redhat Enterprise Linux 5/ SL5 or Centos 5
@@ -32,7 +35,8 @@ All the dependacies are available in the debian repository.
 
 Basic usage
 ---------------------------------------
-
+Basic usage vmilisttool
+---------------------------------------
 
 To get a complete list of available commands do:
 
@@ -67,6 +71,26 @@ Edit the file VMmetadata.json adding your list metadata so no 'null' entries exi
 (4) Sign the now assembled metadata list.
 
     $ vmilisttool  --template merged_image_list.json -s signed_image_list
+
+Basic usage minimal.py
+---------------------------------------
+
+Make a working space
+
+    $ mkdir minimalcode_test
+    $ cd minimalcode_test
+    $ cp ~/.globus/user
+    usercert.pem  userkey.pem   
+    $ cp ~/.globus/user*.pem .
+
+The command is minimal so no options.
+
+    $ python /usr/share/doc/vmilisttool/minimal.py 
+    Enter passphrase:
+    $ ls
+    imagelist.smime  usercert.pem  userkey.pem
+
+The new file contains you sigined image list.
 
 
 Description of meta data fields
@@ -455,4 +479,49 @@ To Verfy the message agaisnt the CA certificate.
 
     openssl smime -in your_signed.msg \
      -CAfile /etc/grid-security/certificates/dd4b34ea.0 \
-     -verify 1> /dev/null 
+     -verify 1> /dev/null
+
+
+For developers
+---------------------------
+
+For developers - minimal.py
+---------------------------
+
+
+This is an alternative implantation of an image list signer in python, 
+using the m2crypto wrapper for openssl as does the CLI.
+
+This version is very compact and simplistic.
+
+It is intended for products like repoman, VMIC and Petrags release
+system, to see an example of signing thier own image lists, using 
+minimal code.
+
+The image list should be placed on a web server.
+
+
+For deployers
+---------------------------
+
+
+A note on web servers and security:
+---------------------------
+
+The security of a signed message with an expiry date is fine to ensure
+that a message is not faked. An old image can be presented to 
+subscribers blocking seeing the new image list. This is very unlikely 
+given HEP name server setups, but to have confidance this is not occuring 
+we need an authenticated connection with the web server and that means SSL. 
+
+It is an image list producers desision if they provide http, or https 
+authenticated or even X509 authenticated access, Since this tool is based 
+on X509 trust I would suggest deploying on an X509 based web server and 
+not requiring client have an identify if possible, http(s) maybe enough 
+security for many this is a discussion point.
+
+
+the signed message
+from a web server we should know that it is the correct web server. I
+am bias to adding restrictions such as only supporting X509 https to
+some web servers. What do people think?

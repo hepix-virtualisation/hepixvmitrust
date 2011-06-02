@@ -1,8 +1,10 @@
 from hepixvmitrust.__version__ import version
 from sys import version_info
-if version_info < (2, 6):
+
+
+try:
 	from distutils.core import setup
-else:
+except:
 	try:
         	from setuptools import setup, find_packages
 	except ImportError:
@@ -32,5 +34,5 @@ setup(name='hepixvmitrust',
         ],
     
     scripts=['vmilisttool'],
-    data_files=[('/usr/share/doc/vmilisttool',['README.md','ChangeLog','imagelist.json'])]
+    data_files=[('/usr/share/doc/vmilisttool',['README.md','ChangeLog','imagelist.json','minimal.py'])]
     )
