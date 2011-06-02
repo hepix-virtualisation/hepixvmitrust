@@ -407,6 +407,20 @@ class VMListControler:
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
         return True
     def generates(self,filename,imagepath=None,metadata=None):
-        pass
+        output_image = None
+        if imagepath!=None:
+            metadata = file_extract_metadata(imagepath)
+            if metadata == None:
+                self.logger.error("reading file '%s'." % (imagename))
+                return False
+            output_image = ImageModel(metadata=metadata)
+        else:
+            output_image = ImageModel()
+        if output_image == None:
+            self.logger.warning("output_image='%s'" %(output_image))
+            
+        f = open(filename, 'w')
+        json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
+        return True
     def dumps(self):
         return self.view.dumps(self.model)
