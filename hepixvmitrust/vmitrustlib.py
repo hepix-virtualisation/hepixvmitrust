@@ -6,8 +6,10 @@ import os
 import sys
 import hashlib
 import os.path
-# needed to the signing of images.
-from M2Crypto import BIO, Rand, SMIME
+# needed for the signing of images.
+import M2Crypto.SMIME 
+import M2Crypto.BIO 
+import M2Crypto.SMIME
 import uuid
 # simplejson is included with Python 2.6 and above
 # with the name json
@@ -315,16 +317,16 @@ class VMListControler:
         
     def sign(self,signer_key,signer_cert,outfile):
         content = self.view.dumps(self.model)
-        self.SMIME = SMIME.SMIME()
-        self.SMIME.load_key(signer_key,signer_cert)
-        buf = BIO.MemoryBuffer(content)        
-        p7 = self.SMIME.sign(buf, SMIME.PKCS7_DETACHED)
-        buf = BIO.MemoryBuffer(content)
-        out = BIO.MemoryBuffer()
-        self.SMIME.write(out, p7, buf)
-        self.message_signed = str(out.read())
+        smime = M2Crypto.SMIME.SMIME()
+        smime.load_key(signer_key,signer_cert)
+        buf = M2Crypto.BIO.MemoryBuffer(content)        
+        p7 = smime.sign(buf,M2Crypto.SMIME.PKCS7_DETACHED)
+        buf = M2Crypto.BIO.MemoryBuffer(content)
+        out = M2Crypto.BIO.MemoryBuffer()
+        smime.write(out, p7, buf)
+        message_signed = str(out.read())
         f = open(outfile, 'w')
-        f.write(self.message_signed )
+        f.write(message_signed)
         return True
 
     def generate(self,filename,imagepath=None):
