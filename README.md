@@ -3,10 +3,13 @@
 Introduction
 ---------------------------------------
 
-hepixvmitrust is a package that contains a library and a CLI tool for
-signing lists of virtual machine image metadata. The tools are generally
-reusable but were developed to satisfy the need to securely exchange virtual
-machine images between High Energy Physics sites.
+hepixvmitrust is a package that contains a CLI tool, and a minimal 
+implementation, in its documentation for X509 signing lists of 
+virtual machine image metadata. The tools are generally reusable 
+but were developed to satisfy the need to securely exchange virtual 
+machine images between High Energy Physics sites, in a similar way 
+to yum and apt repositories provide for rpms, this software provides 
+for Virtual Maschines.
 
 
 Installation on Redhat Enterprise Linux 5/ SL5 or Centos 5
@@ -32,7 +35,8 @@ All the dependacies are available in the debian repository.
 
 Basic usage
 ---------------------------------------
-
+Basic usage vmilisttool
+---------------------------------------
 
 To get a complete list of available commands do:
 
@@ -67,6 +71,26 @@ Edit the file VMmetadata.json adding your list metadata so no 'null' entries exi
 (4) Sign the now assembled metadata list.
 
     $ vmilisttool  --template merged_image_list.json -s signed_image_list
+
+Basic usage minimal.py
+---------------------------------------
+
+Make a working space
+
+    $ mkdir minimalcode_test
+    $ cd minimalcode_test
+    $ cp ~/.globus/user
+    usercert.pem  userkey.pem   
+    $ cp ~/.globus/user*.pem .
+
+The command is minimal so no options.
+
+    $ python /usr/share/doc/vmilisttool/minimal.py 
+    Enter passphrase:
+    $ ls
+    imagelist.smime  usercert.pem  userkey.pem
+
+The new file contains you sigined image list.
 
 
 Description of meta data fields
@@ -313,105 +337,110 @@ A typical image list looks like such
 
     $cat imagelist.json 
     {
-        "dc:date:created": "2011-03-10T17:09:12Z", 
-        "dc:date:expires": "2011-04-07T17:09:12Z", 
-        "dc:description": "a README example of an image list", 
-        "dc:identifier": "4e186b44-2c64-40ea-97d5-e9e5c0bce059", 
-        "dc:source": "example.org", 
-        "dc:title": "README example", 
-        "hv:endorser": {
-            "hv:x509": {
-                "dc:creator": "Owen Synge", 
-                "hv:ca": "/C=DE/O=GermanGrid/CN=GridKa-CA", 
-                "hv:dn": "/C=DE/O=GermanGrid/OU=DESY/CN=Owen Synge", 
-                "hv:email": "owen.synge@desy.de"
-            }
-        }, 
-        "hv:images": [
-            {
-                "hv:image": {
-                    "dc:description": "This is an README example VM", 
-                    "dc:identifier": "488dcdc4-9ab1-4fc8-a7ba-b7a5428ecb3d", 
-                    "dc:title": "README example VM", 
-                    "hv:hypervisor": "kvm", 
-                    "hv:size": 2147483648, 
-                    "hv:uri": "http://example.org/example-image.img", 
-                    "hv:version": "1", 
-                    "sl:arch": "x86_64", 
-                    "sl:checksum:sha512": "8b4c269a60da1061b434b696c4a89293bea847b66bd8ba486a914d4209df651193ee8d454f8231840b7500fab6740620c7111d9a17d08b743133dc393ba2c0d4", 
-                    "sl:comments": "Vanila install with contextulization scripts", 
-                    "sl:os": "Linux", 
-                    "sl:osversion": "SL 5.5"
+        "hv:imagelist": {
+            "dc:date:created": "2011-03-10T17:09:12Z", 
+            "dc:date:expires": "2011-04-07T17:09:12Z", 
+            "dc:description": "a README example of an image list", 
+            "dc:identifier": "4e186b44-2c64-40ea-97d5-e9e5c0bce059", 
+            "dc:source": "example.org", 
+            "dc:title": "README example", 
+            "hv:endorser": {
+                "hv:x509": {
+                    "dc:creator": "Owen Synge", 
+                    "hv:ca": "/C=DE/O=GermanGrid/CN=GridKa-CA", 
+                    "hv:dn": "/C=DE/O=GermanGrid/OU=DESY/CN=Owen Synge", 
+                    "hv:email": "owen.synge@desy.de"
                 }
-            }
-        ], 
-        "hv:uri": "http://example.org/example-image-list.image_list", 
-        "hv:version": "1"
+            }, 
+            "hv:images": [
+                {
+                    "hv:image": {
+                        "dc:description": "This is an README example VM", 
+                        "dc:identifier": "488dcdc4-9ab1-4fc8-a7ba-b7a5428ecb3d", 
+                        "dc:title": "README example VM", 
+                        "hv:hypervisor": "kvm", 
+                        "hv:size": 2147483648, 
+                        "hv:uri": "http://example.org/example-image.img", 
+                        "hv:version": "1", 
+                        "sl:arch": "x86_64", 
+                        "sl:checksum:sha512": "8b4c269a60da1061b434b696c4a89293bea847b66bd8ba486a914d4209df651193ee8d454f8231840b7500fab6740620c7111d9a17d08b743133dc393ba2c0d4", 
+                        "sl:comments": "Vanila install with contextulization scripts", 
+                        "sl:os": "Linux", 
+                        "sl:osversion": "SL 5.5"
+                    }
+                }
+            ], 
+            "hv:uri": "https://example.org/example-image-list.image_list", 
+            "hv:version": "1"
+        }
     }
 
 
 and when signed like this.
 
+
     MIME-Version: 1.0
-    Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg="sha1"; boundary="----EAE3006C97F670EE450F46AC8DF4C070"
-    
+    Content-Type: multipart/signed; protocol="application/pkcs7-signature"; micalg="sha1"; boundary="----1E46927A51C795976CF8F88F2D1050B0"
+
     This is an S/MIME signed message
-    
-    ------EAE3006C97F670EE450F46AC8DF4C070
+
+    ------1E46927A51C795976CF8F88F2D1050B0
     {
-        "dc:date:created": "2011-03-10T17:09:12Z", 
-        "dc:date:expires": "2011-04-07T17:09:12Z", 
-        "dc:description": "a README example of an image list", 
-        "dc:identifier": "4e186b44-2c64-40ea-97d5-e9e5c0bce059", 
-        "dc:source": "example.org", 
-        "dc:title": "README example", 
-        "hv:endorser": {
-            "hv:x509": {
-                "dc:creator": "Owen Synge", 
-                "hv:ca": "/C=DE/O=GermanGrid/CN=GridKa-CA", 
-                "hv:dn": "/C=DE/O=GermanGrid/OU=DESY/CN=Owen Synge", 
-                "hv:email": "owen.synge@desy.de"
-            }
-        }, 
-        "hv:images": [
-            {
-                "hv:image": {
-                    "dc:description": "This is an README example VM", 
-                    "dc:identifier": "488dcdc4-9ab1-4fc8-a7ba-b7a5428ecb3d", 
-                    "dc:title": "README example VM", 
-                    "hv:hypervisor": "kvm", 
-                    "hv:size": 2147483648, 
-                    "hv:uri": "http://example.org/example-image.img", 
-                    "hv:version": "1", 
-                    "sl:arch": "x86_64", 
-                    "sl:checksum:sha512": "8b4c269a60da1061b434b696c4a89293bea847b66bd8ba486a914d4209df651193ee8d454f8231840b7500fab6740620c7111d9a17d08b743133dc393ba2c0d4", 
-                    "sl:comments": "Vanila install with contextulization scripts", 
-                    "sl:os": "Linux", 
-                    "sl:osversion": "SL 5.5"
+        "hv:imagelist": {
+            "dc:date:created": "2011-03-10T17:09:12Z", 
+            "dc:date:expires": "2011-04-07T17:09:12Z", 
+            "dc:description": "a README example of an image list", 
+            "dc:identifier": "4e186b44-2c64-40ea-97d5-e9e5c0bce059", 
+            "dc:source": "example.org", 
+            "dc:title": "README example", 
+            "hv:endorser": {
+                "hv:x509": {
+                    "dc:creator": "Owen Synge", 
+                    "hv:ca": "/C=DE/O=GermanGrid/CN=GridKa-CA", 
+                    "hv:dn": "/C=DE/O=GermanGrid/OU=DESY/CN=Owen Synge", 
+                    "hv:email": "owen.synge@desy.de"
                 }
-            }
-        ], 
-        "hv:uri": "http://example.org/example-image-list.image_list", 
-        "hv:version": "1"
+            }, 
+            "hv:images": [
+                {
+                    "hv:image": {
+                        "dc:description": "This is an README example VM", 
+                        "dc:identifier": "488dcdc4-9ab1-4fc8-a7ba-b7a5428ecb3d", 
+                        "dc:title": "README example VM", 
+                        "hv:hypervisor": "kvm", 
+                        "hv:size": 2147483648, 
+                        "hv:uri": "http://example.org/example-image.img", 
+                        "hv:version": "1", 
+                        "sl:arch": "x86_64", 
+                        "sl:checksum:sha512": "8b4c269a60da1061b434b696c4a89293bea847b66bd8ba486a914d4209df651193ee8d454f8231840b7500fab6740620c7111d9a17d08b743133dc393ba2c0d4", 
+                        "sl:comments": "Vanila install with contextulization scripts", 
+                        "sl:os": "Linux", 
+                        "sl:osversion": "SL 5.5"
+                    }
+                }
+            ], 
+            "hv:uri": "https://example.org/example-image-list.image_list", 
+            "hv:version": "1"
+        }
     }
-    ------EAE3006C97F670EE450F46AC8DF4C070
+    ------1E46927A51C795976CF8F88F2D1050B0
     Content-Type: application/pkcs7-signature; name="smime.p7s"
     Content-Transfer-Encoding: base64
     Content-Disposition: attachment; filename="smime.p7s"
-    
+
     MIIHdAYJKoZIhvcNAQcCoIIHZTCCB2ECAQExCzAJBgUrDgMCGgUAMAsGCSqGSIb3
-    DQEHAaCCBSUwggUhMIIECaADAgECAgIz7DANBgkqhkiG9w0BAQUFADA2MQswCQYD
+    DQEHAaCCBSUwggUhMIIECaADAgECAgIomzANBgkqhkiG9w0BAQUFADA2MQswCQYD
     VQQGEwJERTETMBEGA1UEChMKR2VybWFuR3JpZDESMBAGA1UEAxMJR3JpZEthLUNB
-    MB4XDTExMDExMDE1MDMxN1oXDTEyMDIwOTE1MDMxN1owRjELMAkGA1UEBhMCREUx
+    MB4XDTEwMDEwNTE1MTkyMloXDTExMDIwNDE1MTkyMlowRjELMAkGA1UEBhMCREUx
     EzARBgNVBAoTCkdlcm1hbkdyaWQxDTALBgNVBAsTBERFU1kxEzARBgNVBAMTCk93
-    ZW4gU3luZ2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCkgbPFZrVL
-    pmwf7GKBBFkwTK5V7RmlupsU3Z3FqdfMnJGn2NrrnHIhthUTCTq4WbLIZTbOEh0n
-    JqZgZBvYcwJV4V9pais4YlsEug+JLMbB9hZ6e2XgdjXWgLqz6vBSIf6KXi4KhCxe
-    a4FylvIk7OtY+bg0mg5IFHib6uP7fXhFKdBEapoi+B05wpluBMA+2DBdSt+rjzA8
-    SwiHUuan60VIyJAxammyOe3IKSpwyBXkQ10XjIhIpoSavqYXJboFOVzUcqxawdbX
-    Con2W8QfiwFKYupohG/VTusDXFT2MP4k+KxG3/rTTPWUDJme7VUPv3+CTcEO+z4v
-    X8/XhI44oAXlAgMBAAGjggInMIICIzAMBgNVHRMBAf8EAjAAMA4GA1UdDwEB/wQE
-    AwIE8DAdBgNVHQ4EFgQUGakUy66kgvulNBIf18WBXjGolqYwXgYDVR0jBFcwVYAU
+    ZW4gU3luZ2UwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCwrhgUz/5s
+    E0TJwtZbRbc/Pt8Ti7B7nyMsB8PQsi6aKzsdRaxNgbSmvZwSzU8EzdwXN8YhfLob
+    GWE1agyngcobC8wdC1gK4pl8U1/rzt/wYXtT6FDCQgew2srj63/AzblVcf+eIaU4
+    qZNHTcemNiagdRObdLlx5XF9RxHZaj5z6d2i6V45Gk0K2B9pMdSWQ7DxqFGEiAJj
+    LTWGxlxYyAe7QvqMt8ovzNzcp+dagKDOTflh1/22xHCI8E2E7d1p8anfqA0iz/Kp
+    etvKkAxDfq6/ANP3cHe0E6P0xQr9hrvBLVqDs7rXFweYT4NExN5qMl/3QKN8HEo8
+    NqB0L81EZdZLAgMBAAGjggInMIICIzAMBgNVHRMBAf8EAjAAMA4GA1UdDwEB/wQE
+    AwIE8DAdBgNVHQ4EFgQUpvUfn9v7vTkk4Arr2DREBCFwYa4wXgYDVR0jBFcwVYAU
     xnXJKKzRC/w8/7m1HtNfO4BiEjShOqQ4MDYxCzAJBgNVBAYTAkRFMRMwEQYDVQQK
     EwpHZXJtYW5HcmlkMRIwEAYDVQQDEwlHcmlkS2EtQ0GCAQAwHQYDVR0RBBYwFIES
     b3dlbi5TeW5nZUBkZXN5LmRlMB8GA1UdEgQYMBaBFGdyaWRrYS1jYUBpd3IuZnpr
@@ -422,25 +451,25 @@ and when signed like this.
     AYb4QgECBBcWFWh0dHA6Ly9ncmlkLmZ6ay5kZS9jYTAzBglghkgBhvhCAQgEJhYk
     aHR0cDovL2dyaWQuZnprLmRlL2NhL2dyaWRrYS1jcHMucGRmMDMGCWCGSAGG+EIB
     AwQmFiRodHRwOi8vZ3JpZC5memsuZGUvY2EvZ3JpZGthLWNybC5kZXIwDQYJKoZI
-    hvcNAQEFBQADggEBAMbn91TOQ6r4D/aKwgIFXiXe40B7iccz/P5pCFSi1R6IC3KH
-    Ui4s/f9iAGl9rA21h8QAaRaJ/h1OQNlgMZbc9jDCWcqxr8wQTYAQDiBkspLT68ZO
-    5xVFRiq3HjkkhwnFfFzsNSiLFYZTRjChPluclYG3TEvSg8dz9Lv/IEJxE5C5lZ2d
-    e3CSu0vcD0DESiu/sVqPOOHi8NL/59U2ine3z23Y+piCabQCxjT0inT2MmR8UNDF
-    ij2JJYxlt56U/SQCEe0304w3x1jIg8vcpm4dfh+L2IjJ9hVfEeLaCyhv9Wjbmu5O
-    vk0yLjcEZ7b4RKeo7djVYh+5kCWJYCr/W6uGW44xggIXMIICEwIBATA8MDYxCzAJ
+    hvcNAQEFBQADggEBAC38bU92oulqPH4oBR6CrUuuMwMJM0UOE4xGxFwDQly0+dog
+    LZRGM5f5FO4YItTkRS9E1kztAx23v2BVxoksKPF2sD8M8xlUJJEKySCimNBSeGJ9
+    SNe8tYHOhCN15a10RUmP1LWYNn9ZHCHGVgwoYoJj4rddz6/To5/O0X3IuARrwF5A
+    AJ3Y57nkT0oyyEtmHOz1eRKi5+vgmJiPGP2uyObC37hftlTUVbYjG9xxqhtO4os9
+    0iZluEzip2SPAN6fAnapH5fALt3CesyuRpo+O+2/OGHS9IB1aMrlg/UZblOKUD4P
+    eNqZBinlbo3MOjURyjUMlJwKVijumA56kxe1pssxggIXMIICEwIBATA8MDYxCzAJ
     BgNVBAYTAkRFMRMwEQYDVQQKEwpHZXJtYW5HcmlkMRIwEAYDVQQDEwlHcmlkS2Et
-    Q0ECAjPsMAkGBSsOAwIaBQCggbEwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-    BgkqhkiG9w0BCQUxDxcNMTEwMzEwMTczMzU1WjAjBgkqhkiG9w0BCQQxFgQUd43y
-    VT05Zk+7acFF+EeqExNI57cwUgYJKoZIhvcNAQkPMUUwQzAKBggqhkiG9w0DBzAO
+    Q0ECAiibMAkGBSsOAwIaBQCggbEwGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
+    BgkqhkiG9w0BCQUxDxcNMTEwNjAyMTcwMjM3WjAjBgkqhkiG9w0BCQQxFgQUZURv
+    RNoVqNlDMwDXxAl1eB09jfYwUgYJKoZIhvcNAQkPMUUwQzAKBggqhkiG9w0DBzAO
     BggqhkiG9w0DAgICAIAwDQYIKoZIhvcNAwICAUAwBwYFKw4DAgcwDQYIKoZIhvcN
-    AwICASgwDQYJKoZIhvcNAQEBBQAEggEAkA0RgB5AkGIYvFsFETzx7QHKWu9qas5k
-    vlHn2a+EpRE9K1p+qrFNzS53E2BGqubyRcePfgG/WyGqYOK2h20d6GZH+ENUFkvM
-    EAthbvQaHye6WEvF/0GUrr0QUBT1gQswkkryPHcqTVmJANQORakkNvCwynEBmfSC
-    vb2TEppRuOCmxx3zqrzMr7zPNPY4w2+YaXQ1fHfmEmOrlf0ImP20TyTKIoQWqzbq
-    WXwlRhZBUoD9zfiEM/jFvOvkuxLkQeiEcSzlLAGHXsHJ3anPMX9sobJFbJI0wYdN
-    sUOInHRhksokh2ow68KZK4vXLI173v5yZE7FZZ1Gl9T+YpkmOIW4iQ==
-    
-    ------EAE3006C97F670EE450F46AC8DF4C070--
+    AwICASgwDQYJKoZIhvcNAQEBBQAEggEAgUvNjPvDey3UCLxNLP9lQDZyGahWrWVp
+    UfjetLHG5aC8c9UH23oyealhVzz9ko2c49qY1XTjwEGCR22o7sC7WL7d6Zz1kcyI
+    FCUR+JSvMPGiR+wKuQ9DO5+FYef6qQPAtSCBWBueTZ6HZYuW6HHWIWsPiLLiWAwl
+    CElCKFXX50tYkTdmce2G+CINsobi3F0B3pma2IwZkAlN28rFFzC8wDehrbrAHgD5
+    DEjdS+Jue08tOO2iiut1qmaOLc9nVP7L16HxUaeZ/FxtnFDlGu2fxQhEn/Y9b+5x
+    VU++amevq+5hpJIednJ5fbmDR9NFqTpSEtI4J8kcgQ+HrWdZIXTWPg==
+
+    ------1E46927A51C795976CF8F88F2D1050B0--
 
 
 How to verify
@@ -455,4 +484,49 @@ To Verfy the message agaisnt the CA certificate.
 
     openssl smime -in your_signed.msg \
      -CAfile /etc/grid-security/certificates/dd4b34ea.0 \
-     -verify 1> /dev/null 
+     -verify 1> /dev/null
+
+
+For developers
+---------------------------
+
+For developers - minimal.py
+---------------------------
+
+
+This is an alternative implantation of an image list signer in python, 
+using the m2crypto wrapper for openssl as does the CLI.
+
+This version is very compact and simplistic.
+
+It is intended for products like repoman, VMIC and Petrags release
+system, to see an example of signing thier own image lists, using 
+minimal code.
+
+The image list should be placed on a web server.
+
+
+For deployers
+---------------------------
+
+
+A note on web servers and security:
+---------------------------
+
+The security of a signed message with an expiry date is fine to ensure
+that a message is not faked. An old image can be presented to 
+subscribers blocking seeing the new image list. This is very unlikely 
+given HEP name server setups, but to have confidance this is not occuring 
+we need an authenticated connection with the web server and that means SSL. 
+
+It is an image list producers desision if they provide http, or https 
+authenticated or even X509 authenticated access, Since this tool is based 
+on X509 trust I would suggest deploying on an X509 based web server and 
+not requiring client have an identify if possible, http(s) maybe enough 
+security for many this is a discussion point.
+
+
+the signed message
+from a web server we should know that it is the correct web server. I
+am bias to adding restrictions such as only supporting X509 https to
+some web servers. What do people think?
