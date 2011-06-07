@@ -1,3 +1,18 @@
+ChangeLog hepixvmitrust-0.0.10
+
+Use python standard logging library.
+Decode the correct data format.
+    Still output the old incorrect format for this release. 
+        After hepixvmitrust-0.0.11 thsi will be corrected.
+Small cleanup to signing code.
+Added a minimal.py example generating imagelist with minimal code.
+Added documentation on using minimal.py
+Updated documentation to show the new image format.
+Added documentation on how to deploy your image list once generated.
+Added thsi changelog.
+
+
+
 2011-03-31 17:55 Ian Gable <igable@uvic.ca>
 
 	* vmilistool.py: renamed to vmilisttool, and had the reusable
