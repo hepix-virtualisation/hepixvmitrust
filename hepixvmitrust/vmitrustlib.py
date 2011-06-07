@@ -338,6 +338,9 @@ class VMListControler:
             return False
         return self.view.images_list(self.model)
     def image_add(self,filename):
+        if not os.path.isfile(filename):
+            self.logger.error("Invalid path to file '%s'." % (filename))
+            return False
         f = open(filename, 'r')
         json_stuff = json.load(f)
         fred= VMimageDecoder(json_stuff)
@@ -407,15 +410,15 @@ class VMListControler:
 
     def generate(self,filename,imagepath=None):
         output_image = None
-
         if imagepath!=None:
 
             metadata = file_extract_metadata(imagepath)
             if metadata == None:
-                self.logger.error("reading file '%s'." % (imagename))
+                self.logger.error("reading file '%s'." % (imagepath))
                 return False
             output_image = ImageModel(metadata=metadata)
         else:
+            self.logger.error("geenrating'%s'." % (filename))
             output_image = ImageModel()
         f = open(filename, 'w')
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
