@@ -242,7 +242,6 @@ def file_extract_metadata(file_name):
             u'sl:checksum:sha512' : m.hexdigest()}
 
 def applydefaults(FirstParty,Secondparty,overwrite = False):
-    print "sdfsdf"
     if not isinstance (ImageModel):
         return False
 
