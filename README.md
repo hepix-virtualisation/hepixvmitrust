@@ -72,6 +72,49 @@ Edit the file VMmetadata.json adding your list metadata so no 'null' entries exi
 
     $ vmilisttool  --template merged_image_list.json -s signed_image_list
 
+Enviroment variables
+---------------------------------------
+
+Enviroment variables can be used to set defaults for variables that must be added to the 
+JSON directly if not set.
+
+Three groups of enviroment variables exist, Image list level, 
+Endorser level and Image level. These three groups have unique prefixs.
+
+(1) Image list level
+
+    HVMIL_DC_DATE_CREATED
+    HVMIL_DC_DATE_EXPIRES
+    HVMIL_DC_DESCRIPTION
+    HVMIL_DC_IDENTIFIER
+    HVMIL_DC_SOURCE
+    HVMIL_DC_TITLE
+    HVMIL_HV_URI
+    HVMIL_HV_VERSION
+
+(2) Image level
+
+    HVMILI_DC_DESCRIPTION
+    HVMILI_DC_IDENTIFIER
+    HVMILI_DC_TITLE
+    HVMILI_HV_HYPERVISOR
+    HVMILI_HV_SIZE
+    HVMILI_HV_URI
+    HVMILI_HV_VERSION
+    HVMILI_SL_ARCH
+    HVMILI_SL_CHECKSUM_SHA512
+    HVMILI_SL_COMMENTS
+    HVMILI_SL_OS
+    HVMILI_SL_OSVERSION
+
+(3) Endorser Level
+
+    HVMILE_DC_CREATOR
+    HVMILE_HV_CA
+    HVMILE_HV_DN
+    HVMILE_HV_EMAIL
+
+
 Basic usage minimal.py
 ---------------------------------------
 

@@ -281,8 +281,86 @@ class VMListView:
                 self.logger.warning("This code must be removed soon.")
         self.logger.error("Failed to parse hepiximagelist format.")
         return decoded_image
-
-
+    def enviroment_default_endorser(self,endorser):
+        EndorserEnviromentMapping = {'dc:creator' : 'HVMILE_DC_CREATOR',
+            'hv:ca' : 'HVMILE_HV_CA',
+            'hv:dn' : 'HVMILE_HV_DN',
+            'hv:email' : 'HVMILE_HV_EMAIL'}
+        endorserkeys = endorser.metadata.keys()
+        for metadatakey in EndorserEnviromentMapping.keys():
+            needToDefault = False
+            if not metadatakey in endorserkeys:
+                needToDefault = True
+            else:
+                CurrentValue = endorser.metadata[metadatakey]
+                if CurrentValue == None or CurrentValue == '':
+                    needToDefault = True
+            if needToDefault:
+                env_var = str(EndorserEnviromentMapping[metadatakey])
+                newvalue = os.getenv(env_var)
+                if newvalue != None:
+                    endorser.metadata[metadatakey] = newvalue
+        return True
+    def enviroment_default_image(self,image):
+        ImageEnviromentMapping = {'dc:description' : 'HVMILI_DC_DESCRIPTION',
+            'dc:identifier' : 'HVMILI_DC_IDENTIFIER',
+            'dc:title' : 'HVMILI_DC_TITLE',
+            'hv:hypervisor' : 'HVMILI_HV_HYPERVISOR',
+            'hv:size' : 'HVMILI_HV_SIZE',
+            'hv:uri' : 'HVMILI_HV_URI',
+            'hv:version' : 'HVMILI_HV_VERSION',
+            'sl:arch' : 'HVMILI_SL_ARCH',
+            'sl:checksum:sha512' : 'HVMILI_SL_CHECKSUM_SHA512',
+            'sl:comments' : 'HVMILI_SL_COMMENTS',
+            'sl:os' : 'HVMILI_SL_OS',
+            'sl:osversion' : 'HVMILI_SL_OSVERSION'}
+        imagekeys = image.metadata.keys()
+        for metadatakey in ImageEnviromentMapping.keys():
+            needToDefault = False
+            if not metadatakey in imagekeys:
+                needToDefault = True
+            else:
+                CurrentValue = image.metadata[metadatakey]
+                if CurrentValue == None or CurrentValue == '':
+                    needToDefault = True
+            if needToDefault:
+                env_var = str(ImageEnviromentMapping[metadatakey])
+                newvalue = os.getenv(env_var)
+                if newvalue != None:
+                    image.metadata[metadatakey] = newvalue
+        return True
+    def enviroment_default_imagelist(self,image_list):
+        ListEnviromentMapping = {'dc:date:created' : 'HVMIL_DC_DATE_CREATED',
+            'dc:date:expires' : 'HVMIL_DC_DATE_EXPIRES',
+            'dc:description' : 'HVMIL_DC_DESCRIPTION',
+            'dc:identifier' : 'HVMIL_DC_IDENTIFIER',
+            'dc:source' : 'HVMIL_DC_SOURCE',
+            'dc:title' : 'HVMIL_DC_TITLE',
+            'hv:uri' : 'HVMIL_HV_URI',
+            'hv:version' : 'HVMIL_HV_VERSION'}
+        imagelistkeys = image_list.metadata.keys()
+        for metadatakey in ListEnviromentMapping.keys():
+            needToDefault = False
+            if not metadatakey in imagelistkeys:
+                needToDefault = True
+            else:
+                CurrentValue = image_list.metadata[metadatakey]
+                if CurrentValue == None or CurrentValue == '':
+                    needToDefault = True
+            if needToDefault:
+                env_var = str(ListEnviromentMapping[metadatakey])
+                newvalue = os.getenv(env_var)
+                if newvalue != None:
+                    image_list.metadata[metadatakey] = newvalue
+        self.enviroment_default_endorser(image_list.endorser)
+        for imageIndex in range(len(image_list.images)):
+            self.enviroment_default_image(image_list.images[0])
+        return True
+                
+        
+        
+            
+        
 
 class VMListControler:
     def __init__(self):
@@ -400,7 +478,6 @@ class VMListControler:
     def generate(self,filename,imagepath=None):
         output_image = None
         if imagepath!=None:
-
             metadata = file_extract_metadata(imagepath)
             if metadata == None:
                 self.logger.error("reading file '%s'." % (imagepath))
@@ -409,6 +486,7 @@ class VMListControler:
         else:
             self.logger.error("geenrating'%s'." % (filename))
             output_image = ImageModel()
+        self.view.enviroment_default_image(output_image)
         f = open(filename, 'w')
         json.dump(output_image, f, cls=VMimageListEncoder, sort_keys=True, indent=4)
         return True
@@ -427,3 +505,5 @@ class VMListControler:
         return True
     def dumps(self):
         return self.view.dumps(self.model)
+    def enviroment_default(self):
+        return self.view.enviroment_default_imagelist(self.model)

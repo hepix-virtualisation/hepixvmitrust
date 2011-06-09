@@ -137,7 +137,7 @@ def main():
             listcontroler.loads_smime(text)
         if actions.__contains__('load_template'):
             listcontroler.loads(text)
-    
+    listcontroler.enviroment_default()
     # Now process the actions.
     if actions.__contains__('generate'):
         pairs, extra_gens ,extra_images = pairsNnot(generate_list,imagelist)
