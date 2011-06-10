@@ -140,10 +140,6 @@ class VMimageListEncoder(json.JSONEncoder):
             u'hv:endorser' : self.default(obj.endorser)}
         for key in obj.metadata.keys():
             output[key] = obj.metadata[key]
-        # Now we encode as the broken format so we can read old fromat and write old format.
-        # 
-        return output
-        # This will be released after the next major release 0.10
         return {u'hv:imagelist' : output}
     
     def vm_endorser_encode(self, obj):
@@ -275,7 +271,7 @@ class VMListView:
             decoded_image = VMimageListDecoder(loadedfile)
             if decoded_image != None:
                 # This should be upgraded to a Warning after release 0.10
-                self.logger.info("Parsing depricated hepiximagelist format.")
+                self.logger.warning("Parsing depricated hepiximagelist format.")
                 return decoded_image
             else:
                 self.logger.warning("This code must be removed soon.")
