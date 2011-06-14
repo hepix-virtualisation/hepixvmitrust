@@ -181,6 +181,21 @@ def VMimageDecoder(dct):
 
 def VMimageListDecoder(dictionary):
     if not isinstance(dictionary, dict):
+            return None
+    if not u'hv:imagelist' in dictionary.keys():
+        # This code should be removed in future versions
+        self.logger.warning("Parsing depricated hepiximagelist format.")
+        return _VMimageListDecoder_implementation(dictionary)
+    imagelist_dictionary = dictionary[u'hv:imagelist']
+    if not isinstance(imagelist_dictionary, dict):
+        return None
+    return _VMimageListDecoder_implementation(imagelist_dictionary)
+
+def _VMimageListDecoder_implementation(dictionary):
+    # This function will be deleted soon as it will be merged into 
+    # VMimageListDecoder If you have any reason to use this function
+    # directly please file a bug.
+    if not isinstance(dictionary, dict):
         return None
     dict_keys = set(dictionary.keys())
     if not imagelist_required_metadata_set.issubset(dict_keys):
@@ -215,13 +230,6 @@ def VMimageListDecoder(dictionary):
         )
     return output
 
-def VMimageListDecoderHeader(dct):
-    if not u'hv:imagelist' in dct.keys():
-        return None
-    dictionary = dct[u'hv:imagelist']
-    if not isinstance(dictionary, dict):
-        return None
-    return VMimageListDecoder(dictionary)
     
 def file_extract_metadata(file_name):
     if file_name == None:
@@ -263,18 +271,9 @@ class VMListView:
 
     def loads(self,json_string):
         loadedfile = json.loads(json_string)
-        decoded_image = VMimageListDecoderHeader(loadedfile)
+        decoded_image = VMimageListDecoder(loadedfile)
         if decoded_image != None:
             return decoded_image
-        else:
-            # Hack to get arround imafe format change
-            decoded_image = VMimageListDecoder(loadedfile)
-            if decoded_image != None:
-                # This should be upgraded to a Warning after release 0.10
-                self.logger.warning("Parsing depricated hepiximagelist format.")
-                return decoded_image
-            else:
-                self.logger.warning("This code must be removed soon.")
         self.logger.error("Failed to parse hepiximagelist format.")
         return decoded_image
     def enviroment_default_endorser(self,endorser):
