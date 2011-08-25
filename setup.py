@@ -31,8 +31,9 @@ setup(name='hepixvmitrust',
         'Intended Audience :: Developers',
         'Operating System :: POSIX',
         'Programming Language :: Python',
+        'License :: OSI Approved :: Apache 2.0',
         ],
     
     scripts=['vmilisttool'],
-    data_files=[('/usr/share/doc/vmilisttool',['README.md','ChangeLog','imagelist.json','minimal.py'])]
+    data_files=[('/usr/share/doc/vmilisttool',['README.md','ChangeLog','imagelist.json','minimal.py','LICENSE'])]
     )

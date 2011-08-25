@@ -3,3 +3,4 @@ include vmilisttool.py
 include ChangeLog
 include imagelist.json
 include minimal.py
+include LICENSE
