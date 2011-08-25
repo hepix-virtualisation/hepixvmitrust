@@ -15,25 +15,33 @@ except:
 
 setup(name='hepixvmitrust',
     version=version,
-    description="VM Image list creationg and signing tool",
+    description="VM Image list creation and signing tool",
+    long_description="""hepixvmitrust is a package that contains a CLI tool, and a minimal 
+implementation, in its documentation for X509 signing lists of 
+virtual machine image metadata. The tools are generally reusable 
+but were developed to satisfy the need to securely exchange virtual 
+machine images between High Energy Physics sites, in a similar way 
+to yum and apt repositories provide for rpms, this software provides 
+for Virtual Maschines.""",
     author="O M Synge",
     author_email="owen.synge@desy.de",
+    license='Apache License (2.0)',
     install_requires=[
        "M2Crypto>=0.16",
         ],
     url = 'https://github.com/hepix-virtualisation/hepixvmitrust',
     packages = ['hepixvmitrust'],
     classifiers=[
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
-        'Intended Audience :: System Administrators',
-        'Intended Audience :: Science/Research'
         'Intended Audience :: Developers',
+        'Intended Audience :: Science/Research'
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: Apache Software License',
         'Operating System :: POSIX',
         'Programming Language :: Python',
-        'License :: OSI Approved :: Apache 2.0',
         ],
     
     scripts=['vmilisttool'],
-    data_files=[('/usr/share/doc/vmilisttool',['README.md','ChangeLog','imagelist.json','minimal.py','LICENSE'])]
+    data_files=[('/usr/share/doc/vmilisttool-%s' % (version),['README.md','ChangeLog','imagelist.json','minimal.py','LICENSE'])]
     )
