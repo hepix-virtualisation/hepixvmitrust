@@ -72,13 +72,13 @@ Edit the file VMmetadata.json adding your list metadata so no 'null' entries exi
 
     $ vmilisttool  --template merged_image_list.json -s signed_image_list
 
-Enviroment variables
+Environment variables
 ---------------------------------------
 
-Enviroment variables can be used to set defaults for variables that must be added to the 
+Environment variables can be used to set defaults for variables that must be added to the 
 JSON directly if not set.
 
-Three groups of enviroment variables exist, Image list level, 
+Three groups of environment variables exist, Image list level, 
 Endorser level and Image level. These three groups have unique prefixs.
 
 (1) Image list level
