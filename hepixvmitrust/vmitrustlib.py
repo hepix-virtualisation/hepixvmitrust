@@ -31,7 +31,7 @@ class NullHandler(logging.Handler):
 h = NullHandler()
 logging.getLogger("hepixvmitrust.vmitrustlib").addHandler(h)
 logger = logging.getLogger("hepixvmitrust.vmitrustlib")
-time_required_metadata = [u'dc:date:created', 
+time_required_metadata = [u'dc:date:created',
         u'dc:date:expires',
     ]
 time_required_metadata_set = set(time_required_metadata)
@@ -83,18 +83,18 @@ class EndorserModel:
         self.metadata = metadata
 
 
-class ImageModel:    
+class ImageModel:
     def __init__(self,metadata = {}):
         self.metadata = metadata
 
-        
+
 class ListModel:
     def __init__(self,metadata = {},images=[],endorser=EndorserModel()):
         self.endorser = endorser
         self.metadata = metadata
         self.images = images
 
-        
+
 class VMimageListEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, EndorserModel):
@@ -115,7 +115,7 @@ class VMimageListEncoder(json.JSONEncoder):
                 obj.metadata[field] = ''
         return {u'hv:image' : obj.metadata}
 
-    def vm_imagelist_encode(self, obj):    
+    def vm_imagelist_encode(self, obj):
         if not obj.metadata.has_key(u'dc:identifier'):
             obj.metadata[u'dc:identifier'] = str(uuid.uuid4())
         if not obj.metadata.has_key(u'dc:date:created'):
@@ -141,7 +141,7 @@ class VMimageListEncoder(json.JSONEncoder):
         for key in obj.metadata.keys():
             output[key] = obj.metadata[key]
         return {u'hv:imagelist' : output}
-    
+
     def vm_endorser_encode(self, obj):
         for field in endorser_required_metadata:
             if not obj.metadata.has_key(field):
@@ -155,10 +155,10 @@ def VMendorserDecoder(dct):
         return None
     metadata = dct[u'hv:x509']
     if metadata == None:
-        
+
         logger.error( "coding error=%s" % (dct))
         return None
-    if not endorser_required_metadata_set.issubset(metadata.keys()):    
+    if not endorser_required_metadata_set.issubset(metadata.keys()):
         logger.error( "coding error2=%s" % (dct))
         return None
     #print "VMendorserDecoder.metadata=%s" % (metadata)
@@ -171,7 +171,7 @@ def VMimageDecoder(dct):
     if metadata == None:
         logger.error("coding error=%s" % (dct))
         return None
-    if not image_required_metadata_set.issubset(metadata.keys()):    
+    if not image_required_metadata_set.issubset(metadata.keys()):
         logger.error("coding error2=%s" % (dct))
         return None
     return ImageModel(metadata=metadata)
@@ -192,7 +192,7 @@ def VMimageListDecoder(dictionary):
     return _VMimageListDecoder_implementation(imagelist_dictionary)
 
 def _VMimageListDecoder_implementation(dictionary):
-    # This function will be deleted soon as it will be merged into 
+    # This function will be deleted soon as it will be merged into
     # VMimageListDecoder If you have any reason to use this function
     # directly please file a bug.
     if not isinstance(dictionary, dict):
@@ -230,7 +230,7 @@ def _VMimageListDecoder_implementation(dictionary):
         )
     return output
 
-    
+
 def file_extract_metadata(file_name):
     if file_name == None:
         return
@@ -240,8 +240,8 @@ def file_extract_metadata(file_name):
     filelength = 0
     for line in open(file_name,'r'):
         filelength += len(line)
-        m.update(line) 
-    return {u'hv:size' : filelength, 
+        m.update(line)
+    return {u'hv:size' : filelength,
             u'sl:checksum:sha512' : m.hexdigest()}
 
 class VMListView:
@@ -255,17 +255,17 @@ class VMListView:
         fp = open(filename, 'r')
         json_string = fp.read()
         return self.loads(json_string)
-        
+
     def save_file(self,entry,filename):
         f = open(filename, 'w')
         json.dump(entry, f, cls=VMimageListEncoder, sort_keys=self.sort_keys, indent=self.indent)
         return True
-        
+
     def images_list(self,entry):
         for item in entry.images:
             if u'dc:identifier' in item.metadata.keys():
                 print item.metadata[u'dc:identifier']
-                
+
     def dumps(self,entry):
         return json.dumps(entry, cls=VMimageListEncoder, sort_keys=self.sort_keys, indent=self.indent)
 
@@ -351,28 +351,28 @@ class VMListView:
         for imageIndex in range(len(image_list.images)):
             self.enviroment_default_image(image_list.images[0])
         return True
-                
-        
-        
-            
-        
+
+
+
+
+
 
 class VMListControler:
     def __init__(self):
-        self.logger = logging.getLogger("hepixvmitrust.vmitrustlib.VMListControler")        
+        self.logger = logging.getLogger("hepixvmitrust.vmitrustlib.VMListControler")
         self.view = VMListView()
         self.model = ListModel()
 
     def loaddep(self,filename):
         '''Please use loads
-            This function is depricated as its names not clear 
+            This function is depricated as its names not clear
             what it does and its mixed function.
         '''
         self.logger.warn("Using depricated function 'loaddep'")
         f = open(filename, 'r')
         encoding_string = f.read()
         self.loads(encoding_string)
-        
+
     def loads_smime(self,smime_string):
         buf = M2Crypto.BIO.MemoryBuffer(str(smime_string))
         try:
@@ -380,7 +380,7 @@ class VMListControler:
         except AttributeError, e:
             raise e
         self.loads(data.read())
-        
+
     def loads(self,encoding_string):
         try:
             candidate = self.view.loads(str(encoding_string))
@@ -391,10 +391,10 @@ class VMListControler:
             return False
         self.model = candidate
         return True
-            
+
     def save(self,filename):
         self.view.save_file(self.model,filename)
-        
+
     def images_list(self):
         if self.model == None:
             return False
@@ -410,7 +410,7 @@ class VMListControler:
             return False
         self.model.images.append(fred)
         return True
-        
+
     def image_del(self,uuid):
         matchuuid = None
         if uuid == 'null':
@@ -427,10 +427,10 @@ class VMListControler:
         for i in todelete:
             del self.model.images[i]
         return True
-        
+
     def verify(self):
-        ### This function verifies the values of the metadata 
-        ### 
+        ### This function verifies the values of the metadata
+        ###
         if self.model == None:
             return False
         if not imagelist_required_metadata_set.issubset(self.model.metadata.keys()):
@@ -453,14 +453,14 @@ class VMListControler:
                 self.logger.error("endorser metadata set to none '%s'" % (item))
                 return False
         return True
-        
+
     def sign(self,signer_key,signer_cert,outfile):
         self.logger.warn("Using depricated function 'sign'")
         self.logger.debug("please dumps and use cryptography in an seperate area.")
         content = self.dumps()
         smime = M2Crypto.SMIME.SMIME()
         smime.load_key(signer_key,signer_cert)
-        buf = M2Crypto.BIO.MemoryBuffer(content)        
+        buf = M2Crypto.BIO.MemoryBuffer(content)
         p7 = smime.sign(buf,M2Crypto.SMIME.PKCS7_DETACHED)
         buf = M2Crypto.BIO.MemoryBuffer(content)
         out = M2Crypto.BIO.MemoryBuffer()

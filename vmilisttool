@@ -20,7 +20,7 @@ import datetime
 from hepixvmitrust import VMListControler
 
 # import below purely to get the version number
-# if the command line tool will have different 
+# if the command line tool will have different
 # version number then the library we can take this
 # out
 from hepixvmitrust.__version__ import version
@@ -47,7 +47,7 @@ def pairsNnot(list_a,list_b):
     notpairs_b = []
     for i in diff_b:
         notpairs_b.append(list_b[i])
-    
+
     return arepairs,notpairs_a,notpairs_b
 
 
@@ -69,7 +69,7 @@ def main():
     p.add_option('-c', '--signer_certificate', action ='store', help='path to signer certificate', metavar='SIGNERCERT')
     p.add_option('-s', '--sign', action ='store', help='returns verbose output', metavar='SIGNEDOUTPUT')
     p.add_option('-f', '--format', action ='store', help='Set the format valid values are JSON and XML', metavar='FORMAT')
-    
+
     options, arguments = p.parse_args()
     filename_template = None
     smime_template = None
@@ -101,7 +101,7 @@ def main():
         actions.add('image_del')
     if options.list:
         list_images = True
-        
+
         actions.add('image_list')
     if options.signer_key:
         signer_key = options.signer_key
@@ -120,13 +120,13 @@ def main():
     if options.image:
         imagelist = options.image
         actions.add('generate')
-    
+
     temp1 = actions.intersection(clashingactions_template)
     temp1_len = len (temp1)
     if temp1_len > 1:
         print "Cannot support more than one template with this script."
         sys.exit(1)
-        
+
     if temp1_len == 1:
         filename = filename_template
         if filename == None:
@@ -143,7 +143,7 @@ def main():
         pairs, extra_gens ,extra_images = pairsNnot(generate_list,imagelist)
         if len(extra_images) > 0:
             print "error images and no target"
-        for paired_items in pairs:    
+        for paired_items in pairs:
             listcontroler.generate(paired_items[0],paired_items[1])
         for gen_it in extra_gens:
             rc = listcontroler.generate(gen_it)
@@ -171,7 +171,7 @@ def main():
         content = listcontroler.dumps()
         smime = M2Crypto.SMIME.SMIME()
         smime.load_key(signer_key,signer_cert)
-        buf = M2Crypto.BIO.MemoryBuffer(content)        
+        buf = M2Crypto.BIO.MemoryBuffer(content)
         p7 = smime.sign(buf,M2Crypto.SMIME.PKCS7_DETACHED)
         buf = M2Crypto.BIO.MemoryBuffer(content)
         out = M2Crypto.BIO.MemoryBuffer()
@@ -179,7 +179,7 @@ def main():
         message_signed = str(out.read())
         f = open(signed_message_output, 'w')
         f.write(message_signed)
-        
+
     if actions.__contains__('save'):
         listcontroler.save(json_output)
     if actions.__contains__('format'):

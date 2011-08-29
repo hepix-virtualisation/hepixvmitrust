@@ -16,12 +16,12 @@ except:
 setup(name='hepixvmitrust',
     version=version,
     description="VM Image list creation and signing tool",
-    long_description="""hepixvmitrust is a package that contains a CLI tool, and a minimal 
-implementation, in its documentation for X509 signing lists of 
-virtual machine image metadata. The tools are generally reusable 
-but were developed to satisfy the need to securely exchange virtual 
-machine images between High Energy Physics sites, in a similar way 
-to yum and apt repositories provide for rpms, this software provides 
+    long_description="""hepixvmitrust is a package that contains a CLI tool, and a minimal
+implementation, in its documentation for X509 signing lists of
+virtual machine image metadata. The tools are generally reusable
+but were developed to satisfy the need to securely exchange virtual
+machine images between High Energy Physics sites, in a similar way
+to yum and apt repositories provide for rpms, this software provides
 for Virtual Maschines.""",
     author="O M Synge",
     author_email="owen.synge@desy.de",
@@ -41,7 +41,7 @@ for Virtual Maschines.""",
         'Operating System :: POSIX',
         'Programming Language :: Python',
         ],
-    
+
     scripts=['vmilisttool'],
     data_files=[('/usr/share/doc/vmilisttool-%s' % (version),['README.md','ChangeLog','imagelist.json','minimal.py','LICENSE'])]
     )

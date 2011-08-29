@@ -1,6 +1,6 @@
 import sys
-import M2Crypto.SMIME 
-import M2Crypto.BIO 
+import M2Crypto.SMIME
+import M2Crypto.BIO
 import M2Crypto.SMIME
 
 if float(sys.version[:3]) >= 2.6:
@@ -54,12 +54,12 @@ model = {
 }
 
 
-# Note the dumps command options ",sort_keys=True, indent=2" 
+# Note the dumps command options ",sort_keys=True, indent=2"
 # are optional but make things easier for humans when signing.
 content = json.dumps(model,sort_keys=True, indent=2)
 smime = M2Crypto.SMIME.SMIME()
 smime.load_key(signer_key,signer_cert)
-buf = M2Crypto.BIO.MemoryBuffer(content)        
+buf = M2Crypto.BIO.MemoryBuffer(content)
 p7 = smime.sign(buf,M2Crypto.SMIME.PKCS7_DETACHED)
 buf = M2Crypto.BIO.MemoryBuffer(content)
 out = M2Crypto.BIO.MemoryBuffer()
