@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import codecs
 import optparse
 import os
