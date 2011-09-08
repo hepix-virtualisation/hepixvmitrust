@@ -559,10 +559,10 @@ A note on web servers and security:
 The security of a signed message with an expiry date is fine to ensure
 that a message is not faked. An old image can be presented to
 subscribers blocking seeing the new image list. This is very unlikely
-given HEP name server setups, but to have confidance this is not occuring
+given HEP name server setups, but to have confidence this is not occurring
 we need an authenticated connection with the web server and that means SSL.
 
-It is an image list producers desision if they provide http, or https
+It is an image list producers decision if they provide http, or https
 authenticated or even X509 authenticated access, Since this tool is based
 on X509 trust I would suggest deploying on an X509 based web server and
 not requiring client have an identify if possible, http(s) maybe enough
