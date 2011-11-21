@@ -26,11 +26,11 @@ Install the dependencies from EPEL.
 Install DESY yum repository.
 
     $ cat /etc/yum.repos.d/desyvirt.repo
-[desyvirt]
-name=desyvirt
-baseurl=http://grid.desy.de/vm/repo/yum/sl6/noarch/RPMS.stable/
-enabled=1
-gpgcheck=0
+    [desyvirt]
+    name=desyvirt
+    baseurl=http://grid.desy.de/vm/repo/yum/sl6/noarch/RPMS.stable/
+    enabled=1
+    gpgcheck=0
     $ yum install hepixvmitrust
 
 
