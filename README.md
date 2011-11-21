@@ -12,7 +12,7 @@ to yum and apt repositories provide for rpms, this software provides
 for Virtual Maschines.
 
 
-Installation on Redhat Enterprise Linux 5/ SL5 or Centos 5
+Installation on Redhat Enterprise Linux 5 or 6 / SL5,SL6 or Centos 5 or 6
 ---------------------------------------
 
 First install Extended Packages for Enterprise Linux (EPEL).
@@ -23,7 +23,16 @@ Install the dependencies from EPEL.
 
     $ yum install python-simplejson  python-hashlib m2crypto
 
-Now the dependencies are resolved the script should now run
+Install DESY yum repository.
+
+    $ cat /etc/yum.repos.d/desyvirt.repo
+[desyvirt]
+name=desyvirt
+baseurl=http://grid.desy.de/vm/repo/yum/sl6/noarch/RPMS.stable/
+enabled=1
+gpgcheck=0
+    $ yum install hepixvmitrust
+
 
 Installation on debian 6.0 (squeeze)
 ---------------------------------------
@@ -31,6 +40,10 @@ Installation on debian 6.0 (squeeze)
 All the dependacies are available in the debian repository.
 
     $ aptitude install python-m2crypto
+
+Now install the code froms git.
+
+    $ python setup.py install
 
 
 Basic usage
