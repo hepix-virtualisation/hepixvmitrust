@@ -1,8 +1,26 @@
-ChangeLog hepixvmitrust-0.0.10
+Changelog
+~~~~~~~~~~
+
+hepixvmitrust-0.0.13
+    * Added Apache License Version 2.0
+    * Spelling Corrections to README
+    * Updated documentation of Image list format in README.
+    
+hepixvmitrust-0.0.12
+
+    * Removed an API regresion.
+
+hepixvmitrust-0.0.11
+
+    * Updated to new image format, including a valid header.
+    * Allows using signed image lists as templates as well as JSON.
+    * Default field values can be set with environment variables.
+
+hepixvmitrust-0.0.10
 
 Use python standard logging library.
 Decode the correct data format.
-    Still output the old incorrect format for this release. 
+    Still output the old incorrect format for this release.
         After hepixvmitrust-0.0.11 thsi will be corrected.
 Small cleanup to signing code.
 Added a minimal.py example generating imagelist with minimal code.

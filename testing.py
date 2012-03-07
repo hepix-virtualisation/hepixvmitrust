@@ -34,7 +34,7 @@ def test_things():
     fred= VMendorserDecoder(json_stuff)
     print 'dsadasd'
     print fred.metadata
-    
+
 def test_things2():
     image = ImageModel()
     f = open("fred", 'w')
@@ -59,8 +59,8 @@ def test_things3():
 def test_things4():
     view = VMListView()
     loadedlist = view.load_file('imagelist.json')
-    
-    
+
+
     avmlistOutput = json.dumps(loadedlist,cls=VMimageListEncoder)
     print "vmimagelist=%s" % (type(avmlistOutput))
     f = imagemodel(vmi_uid='32455374',
@@ -92,7 +92,7 @@ def test_things5():
     print "loadedlist.metadata=%s" % (loadedlist.metadata)
     print "loadedlist.endorser=%s" % (loadedlist.endorser)
     print "loadedlist.images=%s" % (loadedlist.images)
-    
+
     avmlistOutput = json.dumps(loadedlist,cls=VMimageListEncoder, sort_keys=True, indent=4)
     print "vmimagelist=%s" % (avmlistOutput)
 
