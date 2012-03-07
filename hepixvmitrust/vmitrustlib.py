@@ -180,14 +180,17 @@ def VMimageDecoder(dct):
 
 
 def VMimageListDecoder(dictionary):
+    log = logging.getLogger("VMimageListDecoder")
     if not isinstance(dictionary, dict):
-            return None
+        log.warning("input is not a dictionary.")
+        return None
     if not u'hv:imagelist' in dictionary.keys():
         # This code should be removed in future versions
-        self.logger.warning("Parsing depricated hepiximagelist format.")
+        log.warning("Parsing depricated hepiximagelist format.")
         return _VMimageListDecoder_implementation(dictionary)
     imagelist_dictionary = dictionary[u'hv:imagelist']
     if not isinstance(imagelist_dictionary, dict):
+        log.warning("Image format parsing has failed.")
         return None
     return _VMimageListDecoder_implementation(imagelist_dictionary)
 
@@ -195,16 +198,22 @@ def _VMimageListDecoder_implementation(dictionary):
     # This function will be deleted soon as it will be merged into 
     # VMimageListDecoder If you have any reason to use this function
     # directly please file a bug.
+    log = logging.getLogger("_VMimageListDecoder_implementation")
     if not isinstance(dictionary, dict):
+        log.warning("input is not a dictionary failed to Decode.")
         return None
     dict_keys = set(dictionary.keys())
     if not imagelist_required_metadata_set.issubset(dict_keys):
+        log.warning("Metadata does not contain required keys, failed to decode.")
         return None
     if not time_required_metadata_set.issubset(dict_keys):
+        log.warning("Metadata does not contain required time keys, failed to decode.")
         return None
     if not dictionary.has_key(u'hv:endorser'):
+        log.warning("Metadata does not contain 'hv:endorser' key, failed to decode.")
         return None
     if not dictionary.has_key(u'hv:images'):
+        log.warning("Metadata does not contain 'hv:images' key, failed to decode.")
         return None
     endorser_dct = dictionary[u'hv:endorser']
     imagelist = dictionary[u'hv:images']
@@ -216,6 +225,7 @@ def _VMimageListDecoder_implementation(dictionary):
     imagelistmetadata = {}
     endorser = VMendorserDecoder(endorser_dct)
     if endorser == None:
+        log.warning("Failed to decode endorser so failign to decode message.")
         return None
     copyfield = dict_keys.difference(time_required_metadata + imagelist_required_metadata_types)
     for field in copyfield:
