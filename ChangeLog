@@ -1,6 +1,11 @@
 Changelog
 ~~~~~~~~~~
-
+hepixvmitrust-0.0.14
+    * Improved README text added some details about install mechanism.
+    * Cleaned up typos in README.
+    * Added better logging on loading structure from JSON.
+    * Fixed a small bug referancing non existant object. 
+    
 hepixvmitrust-0.0.13
     * Added Apache License Version 2.0
     * Spelling Corrections to README
