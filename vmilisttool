@@ -69,6 +69,7 @@ def main():
     p.add_option('-c', '--signer_certificate', action ='store', help='path to signer certificate', metavar='SIGNERCERT')
     p.add_option('-s', '--sign', action ='store', help='returns verbose output', metavar='SIGNEDOUTPUT')
     p.add_option('-f', '--format', action ='store', help='Set the format valid values are JSON and XML', metavar='FORMAT')
+    p.add_option('--imagelist_version', action ='store', help='Over write the version in the message', metavar='FORMAT')
 
     options, arguments = p.parse_args()
     filename_template = None
@@ -83,6 +84,7 @@ def main():
     signed_message_output = None
     list_images = False
     imagelist = []
+    imagelist_version = '0.0.1'
     clashingactions_template = set(['loads_smime_template','load_template'])
     if options.template:
         filename_template = options.template
@@ -120,7 +122,9 @@ def main():
     if options.image:
         imagelist = options.image
         actions.add('generate')
-
+    if options.imagelist_version:
+        imageListVersion = options.imagelist_version
+        actions.add('setversion')
     temp1 = actions.intersection(clashingactions_template)
     temp1_len = len (temp1)
     if temp1_len > 1:
@@ -138,6 +142,8 @@ def main():
         if actions.__contains__('load_template'):
             listcontroler.loads(text)
     listcontroler.enviroment_default()
+    if actions.__contains__('setversion'):
+        listcontroler.model.metadata[u'hv:version'] = imageListVersion
     # Now process the actions.
     if actions.__contains__('generate'):
         pairs, extra_gens ,extra_images = pairsNnot(generate_list,imagelist)
