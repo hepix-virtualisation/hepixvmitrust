@@ -47,5 +47,5 @@ for Virtual Maschines.""",
         ],
 
     scripts=['vmilisttool'],
-    data_files=[('share/doc/vmilisttool-%s' % (version),['README.md','ChangeLog','imagelist.json','minimal.py','LICENSE'])]
+    data_files=[('/usr/share/doc/vmilisttool-%s' % (version),['README.md','ChangeLog','imagelist.json','minimal.py','LICENSE'])]
     )
