@@ -1,6 +1,10 @@
 Changelog
 ~~~~~~~~~~
 
+hepixvmitrust-0.0.16
+    * Added 2 unit tests
+    * default to use setuptools rather than distutils
+
 hepixvmitrust-0.0.15
 
     * Added new command line option to set the version number of the image.

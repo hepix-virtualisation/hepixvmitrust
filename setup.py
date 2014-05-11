@@ -1,16 +1,15 @@
 from hepixvmitrust.__version__ import version
 from sys import version_info
 
-
 try:
-	from distutils.core import setup
-except:
+    from setuptools import setup, find_packages
+except ImportError:
 	try:
-        	from setuptools import setup, find_packages
+            from distutils.core import setup
 	except ImportError:
-        	from ez_setup import use_setuptools
-        	use_setuptools()
-        	from setuptools import setup, find_packages
+            from ez_setup import use_setuptools
+            use_setuptools()
+            from setuptools import setup, find_packages
 
 
 setup(name='hepixvmitrust',
@@ -29,6 +28,11 @@ for Virtual Maschines.""",
     install_requires=[
        "M2Crypto>=0.16",
         ],
+    tests_require=[
+        'coverage >= 3.0',
+        'nose >= 1.1.0',
+        'mock',
+    ],
     url = 'https://github.com/hepix-virtualisation/hepixvmitrust',
     packages = ['hepixvmitrust'],
     classifiers=[
