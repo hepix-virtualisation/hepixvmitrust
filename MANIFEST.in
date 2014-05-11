@@ -4,3 +4,4 @@ include ChangeLog
 include imagelist.json
 include minimal.py
 include LICENSE
+include tests/*.py
