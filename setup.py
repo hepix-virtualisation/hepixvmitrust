@@ -33,6 +33,10 @@ for Virtual Maschines.""",
         'nose >= 1.1.0',
         'mock',
     ],
+    setup_requires=[
+        'nose',
+    ],
+    test_suite = 'nose.collector',
     url = 'https://github.com/hepix-virtualisation/hepixvmitrust',
     packages = ['hepixvmitrust'],
     classifiers=[
