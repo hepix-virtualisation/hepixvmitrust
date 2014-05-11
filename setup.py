@@ -33,6 +33,7 @@ for Virtual Maschines.""",
         'nose >= 1.1.0',
         'mock',
     ],
+    # This is required to make nose tests run under SL6
     setup_requires=[
         'nose',
     ],
