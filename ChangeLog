@@ -1,6 +1,9 @@
 Changelog
 ~~~~~~~~~~
 
+hepixvmitrust-0.0.17
+    * Now we dynamically set the data path when in a virtual enviroment.
+
 hepixvmitrust-0.0.16
     * Added 2 unit tests
     * default to use setuptools rather than distutils
