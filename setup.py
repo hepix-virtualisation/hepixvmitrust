@@ -1,5 +1,6 @@
 from hepixvmitrust.__version__ import version
 from sys import version_info
+import os
 
 try:
     from setuptools import setup, find_packages
@@ -10,6 +11,10 @@ except ImportError:
             from ez_setup import use_setuptools
             use_setuptools()
             from setuptools import setup, find_packages
+
+data_files_installdir = "/usr/share/doc/vmilisttool-%s" % (version)
+if "VIRTUAL_ENV" in  os.environ:
+    data_files_installdir = 'doc'
 
 
 setup(name='hepixvmitrust',
@@ -52,5 +57,5 @@ for Virtual Maschines.""",
         ],
 
     scripts=['vmilisttool'],
-    data_files=[('/usr/share/doc/vmilisttool-%s' % (version),['README.md','ChangeLog','imagelist.json','minimal.py','LICENSE'])]
+    data_files=[(data_files_installdir ,['README.md','ChangeLog','imagelist.json','minimal.py','LICENSE'])]
     )
