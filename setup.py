@@ -12,6 +12,14 @@ except ImportError:
             use_setuptools()
             from setuptools import setup, find_packages
 
+# we want this module for nosetests
+try:
+    import multiprocessing
+except ImportError:
+    # its not critical if this fails though.
+    pass
+
+
 data_files_installdir = "/usr/share/doc/vmilisttool-%s" % (version)
 if "VIRTUAL_ENV" in  os.environ:
     data_files_installdir = 'doc'
