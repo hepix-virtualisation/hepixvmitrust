@@ -20,7 +20,7 @@ else:
 import datetime
 import time
 import logging, logging.config
-
+import functools
 # Set up teh logging library
 class NullHandler(logging.Handler):
     def emit(self, record):
@@ -246,9 +246,13 @@ def file_extract_metadata(file_name):
         return None
     m = hashlib.sha512()
     filelength = 0
-    for line in open(file_name,'r'):
-        filelength += len(line)
-        m.update(line)
+    fp = open(file_name,'r')
+    chunked_file_reader = functools.partial(fp.read, 4096)
+    for data in iter(chunked_file_reader, ''):
+        length = len(data)
+        filelength += length
+        m.update(data)
+    fp.close()
     return {u'hv:size' : filelength,
             u'sl:checksum:sha512' : m.hexdigest()}
 
