@@ -1,6 +1,10 @@
 Changelog
 ~~~~~~~~~~
 
+
+hepixvmitrust-0.0.18
+    * Removed bug memmory bug.
+
 hepixvmitrust-0.0.17
     * Now we dynamically set the data path when in a virtual enviroment.
 
